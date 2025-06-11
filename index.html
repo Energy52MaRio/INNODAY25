@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktiver Workshop-Hub: Prompting Masterclass für die WALTER FRIES Gruppe</title>
+    <title>Interaktiver Workshop-Hub: Prompting Masterclass für die WALTERFRIES Gruppe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -73,7 +73,7 @@
         
         <header class="text-center mb-10 pt-8">
             <h1 class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">Prompting Masterclass</h1>
-            <p class="text-lg text-slate-600 mt-2">Euer interaktiver Hub für die WALTER FRIES Gruppe</p>
+            <p class="text-lg text-slate-600 mt-2">Euer interaktiver Hub für die WALTERFRIES Gruppe</p>
         </header>
         
         <div class="bg-white/50 border border-slate-200 rounded-2xl shadow-lg p-4 md:p-8">
@@ -89,7 +89,7 @@
 
             <main>
                 <!-- SECTION: Grundlagen -->
-                <section id="grundlagen" class="content-section active">
+                <section id="grundlagen" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Die Basis für Euren Erfolg</h2>
                         <p class="max-w-3xl mx-auto text-slate-600">Um ChatGPT meisterhaft zu nutzen, müssen wir verstehen, was es ist, was es nicht ist und welche grundlegenden Prinzipien seine Ergebnisse bestimmen. Dieser Bereich legt das Fundament für Euren Erfolg.</p>
@@ -178,7 +178,7 @@
                             </div>
                             <div>
                                 <label for="userContext" class="block text-sm font-medium text-slate-700">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
-                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTER FRIES">
+                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTERFRIES">
                             </div>
                             <button id="generateUniversalPrompt" class="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 ✨ Prompt vom KI-Coach entwickeln lassen
@@ -207,18 +207,48 @@
                         <h2 class="text-3xl font-bold mb-2">Fortgeschrittene Prompt-Techniken</h2>
                         <p class="max-w-3xl mx-auto text-slate-600">Meistert diese Techniken, um die KI zu Höchstleistungen anzuspornen und Eure Analyse-Workflows zu automatisieren.</p>
                     </div>
-                    <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="grid md:grid-cols-1 lg:grid-cols-1 gap-8">
                         <div class="card p-6">
                             <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>Chain-of-Thought (CoT)</h3>
-                            <p class="text-sm">Weist die KI an, ihre "Gedankenkette" offenzulegen, indem Ihr am Ende eines Prompts hinzufügt: `"Denk Schritt für Schritt nach."`. Das verbessert die logische Herleitung bei komplexen Problemen und macht die Ergebnisse nachvollziehbarer.</p>
+                            <p class="text-sm mb-4">Weist die KI an, ihre "Gedankenkette" offenzulegen, indem Ihr am Ende eines Prompts hinzufügt: `"Denk Schritt für Schritt nach."`. Das verbessert die logische Herleitung bei komplexen Problemen und macht die Ergebnisse nachvollziehbarer.</p>
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                                <div>
+                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Analysiere die Risiken einer Übernahme von Firma A durch Firma B."</p>
+                                    <p class="text-xs text-slate-500">Zu vage, führt zu einer oberflächlichen Liste.</p>
+                                </div>
+                                <div>
+                                    <p><strong class="text-teal-600">Gut:</strong> "Agiere als M&A-Analyst. Analysiere die finanziellen Risiken bei der Übernahme eines fiktiven Software-Unternehmens ('TargetSoft') durch einen strategischen Investor ('GlobalCorp'). Berücksichtige dabei Bilanzrisiken, potenzielle Integrationskosten und Abhängigkeiten vom Management. **Denk Schritt für Schritt nach**, wie du zu deiner Schlussfolgerung kommst."</p>
+                                    <p class="text-xs text-slate-500">Erzwingt eine strukturierte, logische Analyse statt nur einer Antwort.</p>
+                                </div>
+                            </blockquote>
                         </div>
                         <div class="card p-6">
                              <h3 class="text-xl font-bold mb-2 text-sky-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Few-Shot Prompting</h3>
-                            <p class="text-sm">Zeigt der KI genau, was Ihr wollt, indem Ihr 2-3 Beispiele direkt in den Prompt schreibt. Beispiel: `Übersetze: Apfel -> Apple; Haus -> House; Auto -> ?`. Die KI lernt das Muster und wendet es an.</p>
+                            <p class="text-sm mb-4">Zeigt der KI genau, was Ihr wollt, indem Ihr 2-3 Beispiele direkt in den Prompt schreibt. Die KI lernt das Muster und wendet es an.</p>
+                             <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                                <div>
+                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Extrahiere die Kernkompetenzen aus dieser Unternehmensbeschreibung: [Text]"</p>
+                                    <p class="text-xs text-slate-500">Unklar, was als "Kernkompetenz" gilt. Das Ergebnis kann zu lang oder irrelevant sein.</p>
+                                </div>
+                                <div>
+                                    <p><strong class="text-teal-600">Gut:</strong> "Extrahiere die Kernkompetenz (max. 3 Wörter) aus einer Beschreibung. Beispiele:<br>Text: 'Innovatech GmbH ist führend in KI-gestützten Logistiklösungen.' -> KI-Logistiklösungen<br>Text: 'SolidSolutions AG bietet robuste CRM-Systeme.' -> Robuste CRM-Systeme<br>--<br>Text: 'MedTech GmbH stellt hochpräzise chirurgische Instrumente her.' -> ?"</p>
+                                    <p class="text-xs text-slate-500">Gibt der KI klare Beispiele für das gewünschte Format und den Inhalt.</p>
+                                </div>
+                            </blockquote>
                         </div>
                         <div class="card p-6">
                             <h3 class="text-xl font-bold mb-2 text-indigo-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18h.01"/><path d="M16 12h-4"/><path d="M16 15h-4"/><path d="M10 9h1"/></svg>Strukturierte Daten</h3>
-                            <p class="text-sm">Fordert explizit maschinenlesbare Formate an, z.B. `"Gib die Ergebnisse als JSON-Objekt aus."` oder `"Formatiere die Analyse als Markdown-Tabelle."`. Das ist ideal, um Daten direkt in Excel oder andere Systeme zu importieren.</p>
+                            <p class="text-sm mb-4">Fordert explizit maschinenlesbare Formate an. Das ist ideal, um Daten direkt in Excel oder andere Systeme zu importieren.</p>
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                                <div>
+                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Liste mir die Vor- und Nachteile von Target A auf."</p>
+                                    <p class="text-xs text-slate-500">Erzeugt unstrukturierten Fließtext, der manuell aufbereitet werden muss.</p>
+                                </div>
+                                <div>
+                                    <p><strong class="text-teal-600">Gut:</strong> "Agiere als Due-Diligence-Analyst. Erstelle eine Analyse des fiktiven Unternehmens 'Target A'. Gib das Ergebnis als JSON-Objekt aus. Das JSON-Objekt soll zwei Haupt-Schlüssel haben: 'vorteile' und 'nachteile'. Jeder Schlüssel soll ein Array von Strings sein, wobei jeder String ein relevanter Punkt ist."</p>
+                                    <p class="text-xs text-slate-500">Liefert eine perfekt strukturierte, maschinenlesbare Antwort zur direkten Weiterverarbeitung.</p>
+                                </div>
+                            </blockquote>
                         </div>
                     </div>
                 </section>
@@ -262,18 +292,37 @@
                     <div class="grid md:grid-cols-2 gap-8 mb-12">
                         <div class="card p-6">
                             <h3 class="text-xl font-bold mb-4 text-teal-700">✅ Do's (Die Gebote)</h3>
-                             <ul class="space-y-3 list-inside">
-                                <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Anonymisieren:** Immer Platzhalter statt echter Namen, Zahlen oder Projektdetails verwenden.</span></li>
+                             <ul class="space-y-4">
+                                <li class="flex flex-col items-start">
+                                    <div class="flex items-start w-full">
+                                        <span class="text-teal-500 mr-2 mt-1">✔</span>
+                                        <span>**Anonymisieren:** Immer Platzhalter statt echter Namen, Zahlen oder Projektdetails verwenden.</span>
+                                    </div>
+                                    <blockquote class="mt-2 ml-6 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg">
+                                        <p><strong class="text-rose-600">Schlecht:</strong> "Fasse die Bilanz der Meier GmbH mit Umsatz 1,5 Mio. € für das Projekt 'Condor' zusammen."</p>
+                                        <p class="mt-2"><strong class="text-teal-600">Gut:</strong> "Fasse die Bilanz eines fiktiven Unternehmens mit Umsatz [Umsatz einfügen] für ein Projekt mit dem Codenamen [Codename einfügen] zusammen."</p>
+                                    </blockquote>
+                                </li>
                                 <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Verifizieren:** Fakten, Zahlen und Quellen IMMER prüfen. Eure Fachkompetenz ist entscheidend.</span></li>
                                 <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Transparenz:** Seid transparent, wenn Ihr KI-generierte Inhalte als Grundlage nutzt.</span></li>
                             </ul>
                         </div>
                          <div class="card p-6">
                             <h3 class="text-xl font-bold mb-4 text-rose-700">❌ Don'ts (Die Verbote)</h3>
-                             <ul class="space-y-3 list-inside">
-                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein blindes Vertrauen:** Niemals Ergebnisse ungeprüft kopieren und weiterleiten.</span></li>
-                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein Ersatz für Expertise:** ChatGPT ist ein Werkzeug, kein Experte. Euer Urteil zählt.</span></li>
-                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Keine endgültigen Entscheidungen:** Die KI assistiert, aber sie entscheidet nicht.</span></li>
+                             <ul class="space-y-4">
+                                <li class="flex flex-col items-start">
+                                    <div class="flex items-start w-full">
+                                        <span class="text-rose-500 mr-2 mt-1">✖</span>
+                                        <span>**Keine sensiblen Daten:** Gebt NIEMALS vertrauliche Mandanten- oder Firmendaten ein.</span>
+                                    </div>
+                                    <blockquote class="mt-2 ml-6 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-r-lg">
+                                        <p><strong class="text-rose-600">Beispiel für einen verbotenen Prompt:</strong></p>
+                                        <p class="mt-2 font-mono text-xs">"Schreibe eine E-Mail an Hans Peter (h.peter@mueller-ag.de) und informiere ihn, dass wir sein Angebot für das Projekt 'Titan' in Höhe von 250.000€ nicht annehmen können."</p>
+                                        <p class="mt-2 text-xs text-slate-500">Dieser Prompt enthält Namen, E-Mail, Projektdetails und Finanzdaten.</p>
+                                    </blockquote>
+                                </li>
+                                <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein blindes Vertrauen:** Niemals Ergebnisse ungeprüft kopieren und weiterleiten.</span></li>
+                                <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein Ersatz für Expertise:** ChatGPT ist ein Werkzeug, kein Experte. Euer Urteil zählt.</span></li>
                             </ul>
                         </div>
                     </div>
@@ -281,7 +330,7 @@
                          <h3 class="text-2xl font-bold text-center mb-6">Ethik & kritische Reflexion</h3>
                          <div class="grid md:grid-cols-3 gap-8">
                              <div class="text-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-amber-600"><path d="M12 3v18"/><path d="M17 5.5h-5.2a2 2 0 0 0-1.9 1.3l-1.8 5.4a2 2 0 0 1-1.9 1.3H2"/><path d="M7 18.5h5.2a2 2 0 0 0 1.9-1.3l1.8-5.4a2 2 0 0 1 1.9-1.3H22"/></svg>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-amber-600"><path d="M12 3v18"/><path d="M17 5.5h-5.2a2 2 0 0 0-1.9 1.3l-1.8 5.4a2 2 0 0 1-1.9 1.3H2"/><path d="M7 18.5h5.2a2 2 0 0 0 1.9-1.3l1.8-5.4a2 2 0 0 1 1.9-1.3H22"/></svg>
                                  <h4 class="font-bold">Umgang mit Bias</h4>
                                  <p class="text-sm text-slate-600">Seid Euch bewusst, dass die KI Vorurteile aus ihren Trainingsdaten reproduzieren kann. Hinterfragt stereotype Antworten kritisch und fordert gezielt neutrale oder multiperspektivische Darstellungen an.</p>
                              </div>
@@ -298,32 +347,152 @@
                          </div>
                      </div>
                  </section>
-                 
+                
                 <section id="teams" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Team-Szenarien & Case Studies</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Hier findet Ihr maßgeschneiderte Übungsaufgaben und Fallbeispiele für die WALTER FRIES Gruppe. Nutzt sie, um Eure neuen Fähigkeiten direkt anzuwenden.</p>
+                        <p class="max-w-3xl mx-auto text-slate-600">Hier findet Ihr maßgeschneiderte Übungsaufgaben und Fallbeispiele für die WALTERFRIES Gruppe. Nutzt sie, um Eure neuen Fähigkeiten direkt anzuwenden.</p>
                     </div>
                     <div id="team-accordion" class="space-y-4">
-                        <!-- New Case Study Accordion -->
+                        <!-- Accordion Group for FPM -->
                         <div class="card">
-                            <div class="p-4 cursor-pointer bg-slate-100 rounded-t-lg flex justify-between items-center" data-accordion-toggle="case-study">
-                                <h3 class="text-xl font-bold text-indigo-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 6H3"/><path d="M10 12H3"/><path d="M10 18H3"/><path d="m14 6 7 6-7 6"/></svg>Case Study: KI-gestützte Marktrecherche</h3>
+                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="fpm-group">
+                                <h3 class="text-2xl font-bold text-teal-800">1. FPM (Finance, Performance, Restrukturierung)</h3>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </div>
-                            <div class="p-6 hidden space-y-6" data-accordion-content="case-study">
-                                <div class="prose prose-slate max-w-none">
-                                    <p>Dieses Fallbeispiel zeigt, wie ein typischer Rechercheprozess für ein neues Mandat mit KI-Unterstützung aussehen kann, um die initiale Analysephase erheblich zu beschleunigen.</p>
-                                    <h4>Phase 1: Marktüberblick</h4>
-                                    <p><strong>Ziel:</strong> Schnelle Erfassung von Marktgröße, Hauptakteuren und Trends.</p>
-                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Agiere als Marktforschungsanalyst. Gib mir einen Überblick über den deutschen Markt für [Branche des Targets, z.B. 'Software für Medizintechnik']. Konzentriere dich auf: Marktgröße (Umsatz, Wachstumsprognose), Hauptakteure und die drei wichtigsten Technologietrends der letzten 2 Jahre.</code></pre>
-                                    <h4>Phase 2: Wettbewerbsanalyse</h4>
-                                    <p><strong>Ziel:</strong> Stärken und Schwächen potenzieller Wettbewerber identifizieren.</p>
-                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Vergleiche die folgenden zwei fiktiven Wettbewerber im Bereich [Branche]: 'Innovatech GmbH' und 'SolidSolutions AG'. Erstelle eine Markdown-Tabelle mit den Spalten 'Merkmal', 'Innovatech Stärke/Schwäche', 'SolidSolutions Stärke/Schwäche'. Betrachte die Merkmale: Produktportfolio, Preisstrategie und bekannte Kunden.</code></pre>
-                                    <h4>Phase 3: Erste SWOT-Analyse</h4>
-                                    <p><strong>Ziel:</strong> Gesammelte Informationen zu einer ersten SWOT-Analyse verdichten.</p>
-                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Basierend auf den vorherigen Informationen, erstelle eine erste SWOT-Analyse (Stärken, Schwächen, Chancen, Risiken) für ein fiktives Target-Unternehmen, die 'MedTech Innovators GmbH', das in diesem Markt agiert. Gib für jeden der vier Bereiche zwei relevante Stichpunkte an.</code></pre>
+                            <div class="p-6 hidden space-y-6" data-accordion-content="fpm-group">
+                                <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-teal-700">Thema: Lucanet & Finanzplanung</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Erkläre mir Lucanet."
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine allgemeine, oberflächliche Beschreibung.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-200 bg-teal-50 text-sm w-full rounded-lg">
+                                        <strong class="text-teal-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als BI-Spezialist für Finanzplanung mit Lucanet. Ich bin Junior-Controller. Erstelle eine Checkliste für die Konsolidierung zweier fiktiver Töchter ('Software GmbH', 'Vertriebs GmbH'). Themen: Stammdaten-Validierung, Intercompany-Abstimmung, Validierungsregeln in Lucanet und ein Tipp zum Management-Reporting-Export."</p>
+                                    </blockquote>
                                 </div>
+                                <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-teal-700">Thema: Restrukturierung nach IDW S6</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Was sind die Kernaussagen von IDW S6?"
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine trockene, theoretische Zusammenfassung.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-200 bg-teal-50 text-sm w-full rounded-lg">
+                                        <strong class="text-teal-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als CRO für WALTERFRIES. Ich bereite eine Einschätzung für einen fiktiven Automobilzulieferer vor. Erstelle einen Fragenkatalog gemäß den IDW S6-Krisenstufen (Stakeholder-, Strategie-, Erfolgs-, Liquiditätskrise) und formuliere daraus einen Prompt, um aus Antworten Handlungsfelder für ein Sanierungskonzept abzuleiten."</p>
+                                    </blockquote>
+                                </div>
+                                 <div class="card p-4 bg-amber-50 border border-amber-200">
+                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                     <button id="generateScenario-fpm" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
+                                         ✨ Neues Szenario für FPM generieren
+                                     </button>
+                                     <div id="scenarioLoader-fpm" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-fpm" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Group for Strategie -->
+                        <div class="card">
+                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="strategie-group">
+                                <h3 class="text-2xl font-bold text-sky-800">2. Strategie</h3>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </div>
+                            <div class="p-6 hidden space-y-6" data-accordion-content="strategie-group">
+                                 <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-sky-700">Thema: Führungskräftecoaching & Organisationsentwicklung</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Wie coache ich eine Führungskraft?"
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Allgemeine Coaching-Tipps.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-sky-200 bg-sky-50 text-sm w-full rounded-lg">
+                                        <strong class="text-sky-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als systemischer Organisationsentwickler. Ich coache einen Teamleiter, dessen Team 'demotiviert' ist. Entwickle 3-5 kraftvolle, offene Fragen im Stil des zirkulären Fragens, um seine Perspektive zu erweitern und ihn anzuregen, das Problem aus Sicht seines Teams zu betrachten. Ziel: Hypothesengeleitete Fragen, keine fertigen Lösungen."</p>
+                                    </blockquote>
+                                </div>
+                                <div class="card p-4 bg-amber-50 border border-amber-200">
+                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                     <button id="generateScenario-strategie" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
+                                         ✨ Neues Szenario für Strategie generieren
+                                     </button>
+                                     <div id="scenarioLoader-strategie" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-strategie" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Group for M&A -->
+                        <div class="card">
+                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="mna-group">
+                                <h3 class="text-2xl font-bold text-rose-800">3. M&A</h3>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </div>
+                            <div class="p-6 hidden space-y-6" data-accordion-content="mna-group">
+                                <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-rose-700">Thema: Phasen einer Transaktion</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Liste die Phasen einer M&A-Transaktion auf."
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine generische, triviale Liste.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als M&A-Projektmanager bei WALTERFRIES (Verkäuferseite). Erstelle eine detaillierte Checkliste als Markdown-Tabelle für die Phase zwischen finalem SPA-Entwurf und Notartermin. Spalten: 'Aufgabe', 'Hauptverantwortlicher (WFCF / Mandant / Anwälte)', 'Status', 'Kritische Anmerkung'. Berücksichtige finale Verhandlungen, Offenlegungsanlagen und Kommunikation."</p>
+                                    </blockquote>
+                                </div>
+                                <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-rose-700">Thema: Due Diligence (DD)</h4>
+                                     <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Was prüft man in einer Financial Due Diligence?"
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine Lehrbuch-Aufzählung ohne Branchenfokus.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als Leiter FDD (Käuferseite) für ein fiktives B2B-SaaS-Unternehmen (5 Mio. € Umsatz). Generiere eine priorisierte Anforderungsliste für den Datenraum. Gliedere in: 1. Umsatzqualität & KPIs (MRR, Churn, LTV, CAC), 2. Qualität der Ertragslage (Normalisierungen), 3. Working Capital. Formuliere jede Anforderung als präzise Frage."</p>
+                                    </blockquote>
+                                </div>
+                                <div class="card p-4 bg-amber-50 border border-amber-200">
+                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                     <button id="generateScenario-mna" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
+                                         ✨ Neues Szenario für M&A generieren
+                                     </button>
+                                     <div id="scenarioLoader-mna" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-mna" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                 </div>
+                            </div>
+                        </div>
+
+                         <!-- Accordion Group for Backoffice -->
+                        <div class="card">
+                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="backoffice-group">
+                                <h3 class="text-2xl font-bold text-purple-800">4. Administration & Backoffice</h3>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </div>
+                            <div class="p-6 hidden space-y-6" data-accordion-content="backoffice-group">
+                                <div class="card p-4">
+                                    <h4 class="font-bold text-lg text-purple-700">Thema: Prozessoptimierung & Interne Kommunikation</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Schreib eine E-Mail über den neuen Prozess."
+                                        <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine nichtssagende E-Mail ohne Kontext oder Nutzenargumentation.</p>
+                                    </blockquote>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-purple-200 bg-purple-50 text-sm w-full rounded-lg">
+                                        <strong class="text-purple-600">Best Practice:</strong>
+                                        <p class="mt-2">"Agiere als Leiter des Backoffice bei WALTERFRIES. Formuliere eine interne E-Mail an alle Beraterteams. Thema: Einführung eines neuen, zentralisierten Prozesses zur Reisekostenabrechnung über [Software-Name]. Die E-Mail soll (1) den Nutzen klar kommunizieren (schneller, weniger Fehler), (2) die drei wichtigsten Prozessänderungen skizzieren und (3) auf eine detaillierte Anleitung und einen Q&A-Termin verweisen. Der Ton soll serviceorientiert und positiv sein."</p>
+                                    </blockquote>
+                                </div>
+                                <div class="card p-4 bg-amber-50 border border-amber-200">
+                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                     <button id="generateScenario-backoffice" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
+                                         ✨ Neues Szenario für Backoffice generieren
+                                     </button>
+                                     <div id="scenarioLoader-backoffice" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-backoffice" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                 </div>
                             </div>
                         </div>
                     </div>
@@ -338,9 +507,9 @@
                     <div id="quiz-game" class="hidden card p-6 md:p-8">
                         <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
                             <div class="flex justify-center gap-4 md:gap-6 order-2 md:order-1">
-                                <div id="score-fpm" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-teal-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team FPM</p></div>
+                                <div id="score-wfc" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-teal-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">TEAM WFC</p></div>
                                 <div id="score-backoffice" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-sky-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team Backoffice</p></div>
-                                <div id="score-mna" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-rose-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team M&A</p></div>
+                                <div id="score-wfcf" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-rose-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team WFCF</p></div>
                             </div>
                             <div class="text-center order-1 md:order-2">
                                 <p id="quiz-timer" class="font-bold text-slate-800 text-3xl md:text-4xl">30</p>
@@ -363,9 +532,9 @@
                         <p class="text-xl mb-4">Herzlichen Glückwunsch an</p>
                         <h3 id="winner-team" class="text-4xl font-bold mb-8"></h3>
                         <div class="flex justify-center gap-8 mb-8">
-                            <div id="final-score-fpm" class="text-center"><p class="font-bold text-teal-600 text-3xl">0</p><p>Team FPM</p></div>
+                            <div id="final-score-wfc" class="text-center"><p class="font-bold text-teal-600 text-3xl">0</p><p>TEAM WFC</p></div>
                             <div id="final-score-backoffice" class="text-center"><p class="font-bold text-sky-600 text-3xl">0</p><p>Team Backoffice</p></div>
-                            <div id="final-score-mna" class="text-center"><p class="font-bold text-rose-600 text-3xl">0</p><p>Team M&A</p></div>
+                            <div id="final-score-wfcf" class="text-center"><p class="font-bold text-rose-600 text-3xl">0</p><p>Team WFCF</p></div>
                         </div>
                         <button id="restart-quiz" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Erneut spielen</button>
                     </div>
@@ -414,7 +583,7 @@
                 }, 3000);
             }
 
-            function copyToClipboard(elementId) {
+            window.copyToClipboard = function(elementId) {
                 const textToCopy = document.getElementById(elementId).innerText;
                 const tempTextArea = document.createElement('textarea');
                 tempTextArea.value = textToCopy;
@@ -428,7 +597,7 @@
             const callGemini = async (prompt) => {
                 let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBUE7bGnlayeXWg2_ONFVoT_SHnqptl2fE";
+                const apiKey = ""; // API key removed for security. It will be injected by the environment.
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 try {
                     const response = await fetch(apiUrl, {
@@ -446,6 +615,7 @@
                     return "Leider konnte keine Antwort generiert werden.";
                 } catch (error) {
                     console.error("Gemini API call failed:", error);
+                    showToast('API-Anfrage fehlgeschlagen. Prüfen Sie die Konsole.', 'error');
                     return "Fehler bei der API-Anfrage. Bitte überprüfen Sie die Browser-Konsole.";
                 }
             };
@@ -498,78 +668,10 @@
             if (showcaseGrid) {
                 showcaseData.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'card p-6 cursor-pointer';
+                    card.className = 'card p-6 cursor-pointer hover:shadow-lg transition-shadow';
                     card.innerHTML = `<h4 class="font-bold text-lg text-teal-700">${item.title}</h4><p class="text-sm text-slate-600 mt-2">${item.prompt.substring(0, 80)}...</p>`;
                     card.addEventListener('click', () => openModal(item.title, item.prompt, item.analysis));
                     showcaseGrid.appendChild(card);
-                });
-            }
-            
-            // Team Scenarios Data - Customized for WALTER FRIES
-            const teamData = [
-                 { 
-                    team: "FPM (Finance, Restrukturierung, Strategie)", teamId: "fpm", color: "teal",
-                    basis: { title: "Basis: Gesprächsgliederung bei Nachfolge", prompt: "Agiere als Berater für Corporate Finance bei der WALTER FRIES Gruppe. Erstelle eine Gliederung für ein erstes unverbindliches Gespräch mit dem Inhaber eines fiktiven, mittelständischen Maschinenbauunternehmens. Die Gliederung soll die wichtigsten Optionen (z.B. Verkauf, Management-Buy-Out, Übergabe an die Familie) wertneutral vorstellen und jeweils 2-3 zentrale Diskussionspunkte enthalten." },
-                    experte: { title: "Experte: Follow-Up E-Mail nach Erstgespräch", prompt: "Agiere als erfahrener Strategieberater der WALTER FRIES Gruppe. Formuliere einen Entwurf für eine E-Mail an den Inhaber eines fiktiven Maschinenbauunternehmens, NACHDEM das Erstgespräch zur ungelösten Nachfolge stattgefunden hat. Die E-Mail soll die Situation zusammenfassen, Empathie für seine Lage zeigen und einen konkreten Vorschlag für die nächsten Schritte unterbreiten: einen 'Workshop zur strategischen Neuausrichtung und Nachfolgeplanung'. Skizziere die drei Hauptagenda-Punkte dieses Workshops."}
-                },
-                { 
-                    team: "Backoffice Administration", teamId: "backoffice", color: "sky",
-                    basis: { title: "Basis: Interne Mitteilung zu neuem SOP", prompt: "Erstelle den Entwurf für eine interne Mitteilung der WALTER FRIES Gruppe an alle Berater und Projektleiter. Die Mitteilung soll klar und prägnant über die Einführung eines neuen SOP (Standard Operating Procedure) für die Mandatsannahme (nach GwG) informieren. Nenne die drei wichtigsten Gründe für die Einführung (z.B. Qualitätssicherung, Compliance, Effizienz) und verweise auf das Dokument im Intranet." },
-                    experte: { title: "Experte: Checkliste für Mandatsannahme erstellen", prompt: "Entwickle einen Prompt, um eine Checkliste für die Projektleiter der WALTER FRIES Gruppe zu erstellen. Diese Checkliste soll alle notwendigen Schritte und Dokumente für die Annahme eines neuen M&A-Mandats gemäß dem neuen SOP enthalten. Die Ausgabe soll als Markdown-Tabelle mit den Spalten 'Schritt-Nr.', 'Aufgabe' und 'Verantwortlich (PL/Backoffice)' formatiert sein."}
-                },
-                { 
-                    team: "M&A Transaktions Team", teamId: "mna", color: "rose",
-                    basis: { title: "Basis: Kernargumente für Verkaufspräsentation", prompt: "Agiere als M&A-Berater der WALTER FRIES Gruppe im Verkauf eines fiktiven IT-Dienstleisters. Formuliere drei Kernargumente für eine Präsentation, die die Bedenken eines internationalen Investors bezüglich der Abhängigkeit vom Gründer entkräften. Die Argumente sollen überzeugend und datengestützt sein (nutze Platzhalter für Daten)." },
-                    experte: { title: "Experte: Frage-Antwort-Simulation für Due Diligence", prompt: "Entwickle einen Prompt, der eine 'Frage-Antwort'-Simulation durchführt. Gib ChatGPT die Rolle des kritischen, internationalen Investors, der ein fiktives IT-Unternehmen prüft. Deine Aufgabe ist es dann, als Berater der WALTER FRIES Gruppe auf die Fragen zu antworten. Der Prompt soll ChatGPT anweisen, drei typische, kritische Fragen zur Kundenbindung und zum Gründer-Risiko zu stellen. Formuliere anschließend überzeugende Antworten auf diese fiktiven Fragen." }
-                }
-            ];
-            const teamAccordion = document.getElementById('team-accordion');
-            if(teamAccordion) {
-                 const caseStudyAccordion = teamAccordion.querySelector('[data-accordion-toggle="case-study"]');
-                 if(caseStudyAccordion) {
-                    caseStudyAccordion.addEventListener('click', () => {
-                        const content = caseStudyAccordion.nextElementSibling;
-                        const arrow = caseStudyAccordion.querySelector('span');
-                        content.classList.toggle('hidden');
-                        arrow.classList.toggle('rotate-180');
-                    });
-                 }
-
-                teamData.forEach((data, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'card';
-                    item.innerHTML = `
-                        <div class="p-4 cursor-pointer bg-slate-100 rounded-t-lg flex justify-between items-center" data-accordion-toggle="${index}">
-                            <h3 class="text-xl font-bold">${data.team}</h3>
-                            <span class="transform transition-transform duration-300">▼</span>
-                        </div>
-                        <div class="p-6 hidden space-y-6" data-accordion-content="${index}">
-                            <div class="bg-slate-50 p-4 rounded-lg border">
-                                <h4 class="font-bold text-${data.color}-700">${data.basis.title}</h4>
-                                <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                                    <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-basis')">Kopieren</button>
-                                    <pre id="team${index}-basis" class="whitespace-pre-wrap">${data.basis.prompt}</pre>
-                                </div>
-                            </div>
-                            <div class="bg-slate-50 p-4 rounded-lg border">
-                                <h4 class="font-bold text-${data.color}-700">${data.experte.title}</h4>
-                                 <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                                    <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-experte')">Kopieren</button>
-                                    <pre id="team${index}-experte" class="whitespace-pre-wrap">${data.experte.prompt}</pre>
-                                </div>
-                            </div>
-                            <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                                 <h4 class="font-bold text-amber-800">✨ Szenario-Generator</h4>
-                                 <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für Euer Team erstellen.</p>
-                                 <button id="generateScenario-${data.teamId}" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
-                                    ✨ Neues Szenario für ${data.team} generieren
-                                 </button>
-                                 <div id="scenarioLoader-${data.teamId}" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                                 <div id="scenarioResult-${data.teamId}" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
-                            </div>
-                        </div>
-                    `;
-                    teamAccordion.appendChild(item);
                 });
             }
             
@@ -619,21 +721,25 @@
                     const resultDiv = document.getElementById(`scenarioResult-${teamId}`);
                     
                     let scenarioPrompt = "";
+                    const basePrompt = "Generiere ein kurzes, anonymisiertes und praxisnahes Szenario für die WALTERFRIES Gruppe. Beschreibe eine typische, herausfordernde Situation in 2-3 Sätzen, die für den folgenden Bereich relevant ist:"
+                    
                     if (teamId === "fpm") {
-                        scenarioPrompt = "Generiere ein kurzes, anonymisiertes und herausforderndes Business-Szenario für ein fiktives Unternehmen, das für ein FPM-Beratungsteam der WALTER FRIES Gruppe relevant ist (Themen: Unternehmensnachfolge, Restrukturierung, Strategie). Beschreibe die Ausgangslage und das Kernproblem in 2-3 Sätzen.";
-                    } else if (teamId === "backoffice") {
-                        scenarioPrompt = "Generiere ein kurzes, anonymisiertes und praxisnahes Szenario für das Backoffice/Administration-Team der WALTER FRIES Gruppe. Beschreibe eine typische Herausforderung (z.B. Prozessoptimierung für Mandatsannahme, Einführung eines neuen CRM-Tools, interne Kommunikation zur Compliance) in 2-3 Sätzen.";
+                        scenarioPrompt = `${basePrompt} FPM (Finance, Performance Management, Restrukturierung). Themen könnten sein: Liquiditätsplanung in der Krise, Erstellung eines Sanierungsgutachtens, oder die Einführung einer neuen Planungssoftware.`;
+                    } else if (teamId === "strategie") {
+                        scenarioPrompt = `${basePrompt} Strategieberatung. Themen könnten sein: Coaching einer neuen Führungskraft, Moderation eines Workshops zur Organisationsentwicklung, oder die Entwicklung einer neuen Markteintrittsstrategie.`;
                     } else if (teamId === "mna") {
-                        scenarioPrompt = "Generiere ein kurzes, anonymisiertes und komplexes Szenario für ein M&A-Transaktionsteam der WALTER FRIES Gruppe. Beschreibe ein fiktives Target-Unternehmen (z.B. aus Maschinenbau oder IT) und eine potenzielle Deal-Situation mit einer inhärenten Herausforderung (z.B. unklare Finanzlage, Abhängigkeit vom Gründer) in 2-3 Sätzen.";
+                         scenarioPrompt = `${basePrompt} M&A-Transaktionsberatung. Themen könnten sein: eine komplexe Due Diligence, die Verhandlung eines Kaufvertrags mit schwierigen Klauseln, oder die Post-Merger-Integration.`;
+                    } else if (teamId === "backoffice") {
+                        scenarioPrompt = `${basePrompt} Administration & Backoffice. Themen könnten sein: die Optimierung eines internen Prozesses (z.B. Rechnungsfreigabe), die Einführung eines neuen CRM-Tools, oder die Organisation einer wichtigen internen Veranstaltung.`;
                     }
                     
                     if(scenarioPrompt){
-                         loader.classList.remove('hidden');
-                         resultDiv.classList.add('hidden');
-                         const responseText = await callGemini(scenarioPrompt);
-                         resultDiv.innerText = responseText;
-                         loader.classList.add('hidden');
-                         resultDiv.classList.remove('hidden');
+                          loader.classList.remove('hidden');
+                          resultDiv.classList.add('hidden');
+                          const responseText = await callGemini(scenarioPrompt);
+                          resultDiv.innerText = responseText;
+                          loader.classList.add('hidden');
+                          resultDiv.classList.remove('hidden');
                     }
                 });
             });
@@ -658,7 +764,7 @@
                 { question: "Ein KI-Modell erfindet ein überzeugendes, aber falsches Zitat. Wie nennt man dieses Phänomen?", answers: [{ text: "Bias", correct: false }, { text: "Wissensstopp", correct: false }, { text: "Halluzination", correct: true }, { text: "Kontextfehler", correct: false }] },
                 { question: "Welcher der 3 Faktoren eines Top-Prompts definiert die Zielgruppe und den Stil?", answers: [{ text: "Kontext", correct: false }, { text: "Anweisung", correct: false }, { text: "Ziel", correct: true }, { text: "Format", correct: false }] },
                 { question: "Welches kostenlose Modell eignet sich am besten für schnelle, einfache Aufgaben wie das Zusammenfassen von Texten?", answers: [{ text: "GPT-4o", correct: false }, { text: "GPT-3.5", correct: true }, { text: "Gemini Pro", correct: false }, { text: "Alle sind gleich schnell.", correct: false }] },
-                { question: "Was ist die oberste Priorität beim Einsatz von ChatGPT im Unternehmenskontext der WALTER FRIES Gruppe?", answers: [{ text: "Komplexe Fachfragen", correct: false }, { text: "Sensible oder vertrauliche Daten", correct: true }, { text: "Lange Texte zur Analyse", correct: false }, { text: "Anfragen zur Code-Erstellung", correct: false }] },
+                { question: "Welche Art von Informationen sollten Sie NIEMALS in ChatGPT eingeben, besonders im Kontext der WALTERFRIES Gruppe?", answers: [{ text: "Komplexe Fachfragen", correct: false }, { text: "Sensible oder vertrauliche Daten", correct: true }, { text: "Lange Texte zur Analyse", correct: false }, { text: "Anfragen zur Code-Erstellung", correct: false }] },
                 { question: "Ihr wollt eine Checkliste für die Mandatsannahme erstellen. Welcher Prompt ist am effektivsten?", answers: [{ text: "Gib mir eine Checkliste für die Mandatsannahme.", correct: false }, { text: "Was muss ich bei der Mandatsannahme beachten?", correct: false }, { text: "Erstelle eine Markdown-Tabelle mit den Spalten 'Schritt', 'Aufgabe' und 'Verantwortlich' zum Thema Mandatsannahme.", correct: true }, { text: "Fasse den SOP zur Mandatsannahme zusammen.", correct: false }] },
                 { question: "Was ist der Hauptvorteil, für jedes Mandat einen eigenen Chat zu verwenden?", answers: [{ text: "Es ist übersichtlicher für Euch.", correct: false }, { text: "ChatGPT lernt so schneller über alle Projekte hinweg.", correct: false }, { text: "Der gesamte Kontext eines Mandats bleibt im jeweiligen Chat erhalten.", correct: true }, { text: "Es erhöht die Antwortgeschwindigkeit.", correct: false }] },
                 { question: "Was ist der Zweck des 'Universalprompts'?", answers: [{ text: "Er beantwortet jede Frage sofort perfekt.", correct: false }, { text: "Er hilft Euch, den bestmöglichen Prompt für Euer Ziel zu entwickeln.", correct: true }, { text: "Er schaltet die Premium-Funktionen frei.", correct: false }, { text: "Er ist ein spezieller Befehl für die Datenanalyse.", correct: false }] },
@@ -667,7 +773,7 @@
                 { question: "Für welche Aufgabe würdet Ihr eher das Modell GPT-4o anstatt GPT-3.5 verwenden?", answers: [{ text: "Eine schnelle Umformulierung einer E-Mail.", correct: false }, { text: "Die Analyse eines komplexen Vertragsentwurfs mit subtilen Risiken.", correct: true }, { text: "Eine Liste von 10 allgemeinen Marketing-Slogans.", correct: false }, { text: "Das Zusammenfassen eines internen Protokolls.", correct: false }] },
                 { question: "Was bedeutet die Anonymisierung eines Prompts?", answers: [{ text: "Den Prompt in einer anderen Sprache schreiben.", correct: false }, { text: "Fachbegriffe vermeiden.", correct: false }, { text: "Echte Namen, Firmen und Zahlen durch Platzhalter ersetzen.", correct: true }, { text: "Den Prompt möglichst kurz halten.", correct: false }] },
                 { question: "Die Technik, die Ausgabe eines Prompts als Eingabe für den nächsten zu verwenden, nennt man...", answers: [{ text: "Prompt Stacking", correct: false }, { text: "Prompt Chaining", correct: true }, { text: "Iterative Refinement", correct: false }, { text: "Context Loading", correct: false }] },
-                { question: "Was ist der Zweck der Anweisung 'Agiere als M&A-Berater der WALTER FRIES Gruppe'?", answers: [{ text: "Es schmeichelt der KI.", correct: false }, { text: "Es grenzt die Zielgruppe ein.", correct: false }, { text: "Es gibt der KI einen spezifischen Kontext und eine Rolle.", correct: true }, { text: "Es ist eine reine Stilvorgabe.", correct: false }] },
+                { question: "Was ist der Zweck der Anweisung 'Agiere als M&A-Berater der WALTERFRIES Gruppe'?", answers: [{ text: "Es schmeichelt der KI.", correct: false }, { text: "Es grenzt die Zielgruppe ein.", correct: false }, { text: "Es gibt der KI einen spezifischen Kontext und eine Rolle.", correct: true }, { text: "Es ist eine reine Stilvorgabe.", correct: false }] },
                 { question: "Warum ist es wichtig, die Ergebnisse von ChatGPT immer zu verifizieren?", answers: [{ text: "Weil die KI manchmal zu langsam ist.", correct: false }, { text: "Weil die KI halluzinieren und Bias enthalten kann.", correct:true }, { text: "Weil die kostenlose Version veraltet ist.", correct: false }, { text: "Weil die KI keine Tabellen formatieren kann.", correct: false }] },
                 { question: "Wofür steht die Abkürzung 'KI'?", answers: [{ text: "Kreative Intelligenz", correct: false }, { text: "Künstliche Intelligenz", correct: true }, { text: "Komplexe Intelligenz", correct: false }, { text: "Kybernetische Intelligenz", correct: false }] },
                 { question: "Welches Teilgebiet der KI befasst sich damit, dass Computer aus Daten lernen?", answers: [{ text: "Robotik", correct: false }, { text: "Neuronale Netze", correct: false }, { text: "Maschinelles Lernen (ML)", correct: true }, { text: "Computer Vision", correct: false }] },
@@ -694,10 +800,10 @@
                 const restartQuizBtn = document.getElementById('restart-quiz');
                 let scores, currentQuestionIndex, timer, timerInterval;
                 const TIME_LIMIT = 30;
-                const teams = [ { id: 'fpm', name: 'Team FPM' }, { id: 'backoffice', name: 'Team Backoffice' }, { id: 'mna', name: 'Team M&A' }];
+                const teams = [ { id: 'wfc', name: 'TEAM WFC' }, { id: 'backoffice', name: 'Team Backoffice' }, { id: 'wfcf', name: 'Team WFCF' }];
                 
                 function startGame() {
-                    scores = { fpm: 0, backoffice: 0, mna: 0 };
+                    scores = { wfc: 0, backoffice: 0, wfcf: 0 };
                     currentQuestionIndex = 0;
                     updateScoreboard();
                     quizIntro.classList.remove('active');
@@ -726,7 +832,7 @@
                     shuffledAnswers.forEach(answer => {
                         const button = document.createElement('button');
                         button.textContent = answer.text;
-                        button.className = 'quiz-answer-btn p-4 border rounded-lg bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed';
+                        button.className = 'quiz-answer-btn p-4 border rounded-lg bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed w-full text-left';
                         button.onclick = () => selectAnswer(button, answer.correct, questionData.answers, answeringTeam.id);
                         document.getElementById('answer-options').appendChild(button);
                     });
@@ -742,27 +848,32 @@
                         document.getElementById('answer-rationale').textContent = `Richtig! 10 Punkte für ${teams.find(t=>t.id===teamId).name}!`;
                     } else {
                         button.classList.add('incorrect');
-                        const correctAnswer = allAnswers.find(a => a.correct).text;
-                        document.getElementById('answer-rationale').textContent = `Leider falsch. Die richtige Antwort war: "${correctAnswer}"`;
+                        const correctAnswerText = allAnswers.find(a => a.correct).text;
+                        document.querySelectorAll('.quiz-answer-btn').forEach(btn => {
+                            if (btn.textContent === correctAnswerText) {
+                                btn.classList.add('correct');
+                            }
+                        });
+                        document.getElementById('answer-rationale').textContent = `Leider falsch. Die richtige Antwort war markiert.`;
                     }
                     updateScoreboard();
                     document.getElementById('answer-rationale').classList.remove('hidden');
                     setTimeout(() => {
                         currentQuestionIndex++;
                         displayNextQuestion();
-                    }, 3000);
+                    }, 4000);
                 }
 
                 function startTimer() {
                     let timeLeft = TIME_LIMIT;
                     const timerEl = document.getElementById('quiz-timer');
                     timerEl.textContent = timeLeft;
-                    timerEl.classList.remove('text-rose-600');
+                    timerEl.classList.remove('text-rose-600', 'animate-pulse');
                     timerInterval = setInterval(() => {
                         timeLeft--;
                         timerEl.textContent = timeLeft;
-                        if (timeLeft <= 5) {
-                            timerEl.classList.add('text-rose-600');
+                        if (timeLeft <= 5 && timeLeft > 0) {
+                            timerEl.classList.add('text-rose-600', 'animate-pulse');
                         }
                         if (timeLeft <= 0) {
                             timeUp();
@@ -772,14 +883,18 @@
 
                 function timeUp() {
                      clearInterval(timerInterval);
-                     document.querySelectorAll('.quiz-answer-btn').forEach(btn => btn.disabled = true);
-                     const correctAnswer = quizQuestions[currentQuestionIndex].answers.find(a => a.correct).text;
-                     document.getElementById('answer-rationale').textContent = `Die Zeit ist um! Die richtige Antwort war: "${correctAnswer}"`;
+                     document.querySelectorAll('.quiz-answer-btn').forEach(btn => {
+                        btn.disabled = true;
+                        if (quizQuestions[currentQuestionIndex].answers.find(a => a.text === btn.textContent && a.correct)) {
+                            btn.classList.add('correct');
+                        }
+                     });
+                     document.getElementById('answer-rationale').textContent = `Die Zeit ist um! Die richtige Antwort ist markiert.`;
                      document.getElementById('answer-rationale').classList.remove('hidden');
                      setTimeout(() => {
-                        currentQuestionIndex++;
-                        displayNextQuestion();
-                    }, 3000);
+                         currentQuestionIndex++;
+                         displayNextQuestion();
+                     }, 4000);
                 }
                 
                 function resetQuestionUI() {
@@ -801,8 +916,19 @@
                     teams.forEach(team => {
                          document.querySelector(`#final-score-${team.id} p:first-child`).textContent = scores[team.id];
                     });
-                    const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-                    document.getElementById('winner-team').textContent = `Team ${winner.toUpperCase()}`;
+                    
+                    // Determine winner(s)
+                    const maxScore = Math.max(...Object.values(scores));
+                    const winners = Object.keys(scores).filter(teamId => scores[teamId] === maxScore);
+                    
+                    let winnerText;
+                    if (winners.length > 1) {
+                         winnerText = "Gleichstand zwischen: " + winners.map(id => teams.find(t=>t.id===id).name).join(' & ');
+                    } else {
+                         winnerText = teams.find(t=>t.id===winners[0]).name;
+                    }
+                    
+                    document.getElementById('winner-team').textContent = winnerText;
                 }
 
                 startBtn.addEventListener('click', startGame);
