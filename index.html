@@ -336,7 +336,7 @@
         const callGemini = async (prompt) => {
             let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
             const payload = { contents: chatHistory };
-            const apiKey = "" 
+            const apiKey = "AIzaSyBUE7bGnlayeXWg2_ONFVoT_SHnqptl2fE";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             try {
                 const response = await fetch(apiUrl, {
