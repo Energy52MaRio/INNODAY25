@@ -8,38 +8,40 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals (Slate & Amber) with Teal Accent -->
-    <!-- Application Structure Plan: The SPA uses a thematic tab-based navigation. Core content is presented in interactive cards and accordions. A new card in the 'Grundlagen' section explains the different free ChatGPT models (GPT-3.5 vs. GPT-4o) and their ideal use cases to provide foundational knowledge. Gemini API integration enhances interactivity with a live Universalprompt coach and a dynamic scenario generator. -->
-    <!-- Visualization & Content Choices: 1. GIGO Principle -> Goal: Compare -> Viz: Bar Chart -> Justification: Visualizes a core concept. 2. Universalprompt -> Goal: Interact/Create -> Viz: Interactive input/output form -> Interaction: User input triggers Gemini API call -> Justification: Demonstrates a key technique live. 3. Scenario Generator -> Goal: Create/Practice -> Viz: Button + text area -> Interaction: Button click triggers Gemini API to generate new content -> Justification: Provides endless, relevant practice material. NO SVG/Mermaid used. -->
+    <!-- Application Structure Plan: The SPA uses a thematic tab-based navigation. A new 'Quiz-Battle' section has been added. This section is a self-contained mini-application featuring random team selection, a live scoreboard, and a timed question parcours, designed for a competitive group activity. -->
+    <!-- Visualization & Content Choices: 1. Quiz-Battle -> Goal: Engage/Assess -> Viz: Interactive Game UI -> Interaction: Click-based answers, live score updates, timer, random team selection -> Justification: Gamifies learning, encourages teamwork, and assesses knowledge retention in a dynamic way. 2. Other visualizations remain as before. NO SVG/Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-        }
-        .nav-item {
-            transition: all 0.2s ease-in-out;
+            background-color: #f1f5f9;
         }
         .nav-item.active {
-            background-color: #0d9488; /* teal-600 */
+            background-color: #0d9488;
             color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        .content-section {
-            display: none;
-        }
-        .content-section.active {
-            display: block;
-        }
+        .content-section, #quiz-game, #quiz-results { display: none; }
+        .content-section.active, #quiz-intro.active, #quiz-game.active, #quiz-results.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         .card {
             background-color: white;
             border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+            border: 1px solid #e2e8f0;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        .quiz-answer-btn { transition: all 0.2s ease-in-out; }
+        .quiz-answer-btn:not(:disabled):hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .quiz-answer-btn.correct { background-color: #10b981 !important; color: white !important; border-color: #059669 !important; }
+        .quiz-answer-btn.incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0d9488;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .modal {
             display: none;
             position: fixed;
@@ -62,221 +64,317 @@
             border-radius: 0.75rem;
             animation: slideIn 0.3s;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #0d9488;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 antialiased">
 
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <header class="text-center mb-12">
-            <img src="https://raw.githubusercontent.com/google/gemini-pro-api-pro-code-example-apps/main/community/image-assets/walterfries_logo_green.png" alt="WALTER FRIES Gruppe Logo" class="h-20 w-auto mx-auto mb-6" onerror="this.onerror=null;this.src='https://placehold.co/200x80/a8a29e/ffffff?text=WALTER+FRIES';">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Prompting Masterclass für die WALTER FRIES Gruppe</h1>
-            <p class="text-lg text-slate-600 mt-2">Euer interaktiver Hub für präzise und sichere Ergebnisse</p>
+    <div class="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+        
+        <header class="text-center mb-10 pt-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">Prompting Masterclass</h1>
+            <p class="text-lg text-slate-600 mt-2">Euer interaktiver Hub für die WALTER FRIES Gruppe</p>
         </header>
+        
+        <div class="bg-white/50 border border-slate-200 rounded-2xl shadow-lg p-4 md:p-8">
+            <nav class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
+                <button class="nav-item active flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="grundlagen"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Grundlagen</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="architektur"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Prompt-Architektur</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="advanced"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>Fortgeschrittene Techniken</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="library"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1 2-2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"/><path d="M2 3v16a2 2 0 0 0 2 2h16"/></svg>Prompt-Bibliothek</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="sicherheit"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><shield class="lucide lucide-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></shield></svg>Sicherheit & Ethik</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="teams"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team-Szenarien</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full bg-amber-500 hover:bg-amber-600 text-white" data-target="quiz"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M9.5 14.66A2.5 2.5 0 0 1 12 12a2.5 2.5 0 0 1 2.5 2.66"/></svg>Quiz-Battle</button>
+            </nav>
 
-        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12">
-            <button class="nav-item active text-sm md:text-base font-semibold py-2 px-4 rounded-full" data-target="grundlagen">Grundlagen</button>
-            <button class="nav-item text-sm md:text-base font-semibold py-2 px-4 rounded-full" data-target="architektur">Prompt-Architektur</button>
-            <button class="nav-item text-sm md:text-base font-semibold py-2 px-4 rounded-full" data-target="sicherheit">Sicherheits-Hub</button>
-            <button class="nav-item text-sm md:text-base font-semibold py-2 px-4 rounded-full" data-target="teams">Team-Szenarien</button>
-        </nav>
-
-        <main>
-            <!-- SECTION: Grundlagen -->
-            <section id="grundlagen" class="content-section active">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-2">Die Basis für Euren Erfolg</h2>
-                    <p class="max-w-3xl mx-auto text-slate-600">Um ChatGPT meisterhaft zu nutzen, müssen wir verstehen, was es ist, was es nicht ist und welche grundlegenden Prinzipien seine Ergebnisse bestimmen. Dieser Bereich legt das Fundament für Euren Erfolg.</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-8 mb-12">
-                    <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-2 text-teal-700">Was IST ChatGPT?</h3>
-                        <p>Im Kern ist es ein **Großes Sprachmodell (LLM)**. Es wurde mit gigantischen Textmengen trainiert, um Muster zu erkennen. Es rät, basierend auf Wahrscheinlichkeiten, welches Wort als Nächstes am sinnvollsten ist. Stellt es Euch als extrem fortgeschrittene Autovervollständigung vor.</p>
+            <main>
+                <!-- SECTION: Grundlagen -->
+                <section id="grundlagen" class="content-section active">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Die Basis für Euren Erfolg</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Um ChatGPT meisterhaft zu nutzen, müssen wir verstehen, was es ist, was es nicht ist und welche grundlegenden Prinzipien seine Ergebnisse bestimmen. Dieser Bereich legt das Fundament für Euren Erfolg.</p>
                     </div>
-                    <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-2 text-rose-700">Was ChatGPT NICHT ist!</h3>
-                        <p>Es hat **kein Bewusstsein**, kein Urteilsvermögen und keine Meinung. Es versteht den Inhalt nicht wirklich. Es kennt keine Ereignisse nach seinem letzten Training (**Wissensstopp**) und kann Voreingenommenheiten aus den Trainingsdaten (**Bias**) wiedergeben. Es ist ein Werkzeug, kein Kollege.</p>
-                    </div>
-                    <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-2 text-rose-700">Achtung, "Halluzinationen"!</h3>
-                        <p>Die KI kann überzeugend klingende, aber **völlig falsche Informationen erfinden**. Das passiert, weil sie auf Plausibilität, nicht auf Wahrheit optimiert ist. Eure Fachkompetenz ist der ultimative und unverzichtbare Faktencheck!</p>
-                    </div>
-                    <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-2 text-teal-700">Die goldene Regel des Promptings</h3>
-                        <p>Es gilt das Prinzip: **"Garbage In, Garbage Out"**. Eine vage, unklare Anweisung führt zu einem unbrauchbaren Ergebnis. Eine präzise, kontextreiche Anweisung führt zu einem hochwertigen Ergebnis. Die Qualität Eurer Eingabe bestimmt direkt die Qualität der Ausgabe.</p>
-                    </div>
-                    <!-- NEW CARD about Models -->
-                    <div class="card p-6 md:col-span-2">
-                        <h3 class="text-xl font-bold mb-4 text-center text-amber-800">Welches kostenlose Modell für welchen Zweck?</h3>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 class="font-semibold text-lg">GPT-3.5: Das schnelle Arbeitspferd</h4>
-                                <p class="text-sm text-slate-600 mt-1">Dies ist das Standardmodell. Es ist extrem schnell und ideal für alltägliche Aufgaben, bei denen Geschwindigkeit zählt.</p>
-                                <ul class="text-sm list-disc list-inside mt-2 space-y-1">
-                                    <li>Texte zusammenfassen</li>
-                                    <li>E-Mail-Entwürfe formulieren</li>
-                                    <li>Einfache Ideenfindung (Brainstorming)</li>
-                                    <li>Umformulieren von Sätzen</li>
-                                </ul>
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>Was IST ChatGPT?</h3>
+                            <p>Im Kern ist es ein **Großes Sprachmodell (LLM)**. Es wurde mit gigantischen Textmengen trainiert, um Muster zu erkennen. Es rät, basierend auf Wahrscheinlichkeiten, welches Wort als Nächstes am sinnvollsten ist. Stellt es Euch als extrem fortgeschrittene Autovervollständigung vor.</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-rose-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>Was ChatGPT NICHT ist!</h3>
+                            <p>Es hat **kein Bewusstsein**, kein Urteilsvermögen und keine Meinung. Es versteht den Inhalt nicht wirklich. Es kennt keine Ereignisse nach seinem letzten Training (**Wissensstopp**) und kann Voreingenommenheiten aus den Trainingsdaten (**Bias**) wiedergeben. Es ist ein Werkzeug, kein Kollege.</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-rose-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Achtung, "Halluzinationen"!</h3>
+                            <p>Die KI kann überzeugend klingende, aber **völlig falsche Informationen erfinden**. Das passiert, weil sie auf Plausibilität, nicht auf Wahrheit optimiert ist. Eure Fachkompetenz ist der ultimative und unverzichtbare Faktencheck!</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3v7h6"/><path d="M12 3v18l7-7-7-7z"/></svg>Die goldene Regel des Promptings</h3>
+                            <p>Es gilt das Prinzip: **"Garbage In, Garbage Out"**. Eine vage, unklare Anweisung führt zu einem unbrauchbaren Ergebnis. Eine präzise, kontextreiche Anweisung führt zu einem hochwertigen Ergebnis. Die Qualität Eurer Eingabe bestimmt direkt die Qualität der Ausgabe.</p>
+                        </div>
+                        <div class="card p-6 md:col-span-2">
+                             <h3 class="text-xl font-bold mb-4 text-center text-amber-800 flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-2.8-3.9 3 3 0 0 1 2.8 3.9z"/></svg>Welches kostenlose Modell für welchen Zweck?</h3>
+                            <div class="grid md:grid-cols-2 gap-6 mt-4">
+                                <div>
+                                    <h4 class="font-semibold text-lg">GPT-3.5: Das schnelle Arbeitspferd</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Extrem schnell und ideal für alltägliche Aufgaben, bei denen Geschwindigkeit zählt.</p>
+                                    <ul class="text-sm list-disc list-inside mt-2 space-y-1">
+                                        <li>Texte zusammenfassen</li>
+                                        <li>E-Mail-Entwürfe formulieren</li>
+                                        <li>Einfache Ideenfindung</li>
+                                    </ul>
+                                </div>
+                                 <div>
+                                    <h4 class="font-semibold text-lg">GPT-4o: Der kreative Experte</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Deutlich "intelligenter", versteht komplexe Anweisungen besser, liefert nuanciertere Ergebnisse. In der kostenlosen Version mit Nutzungslimit.</p>
+                                    <ul class="text-sm list-disc list-inside mt-2 space-y-1">
+                                        <li>Analyse komplexer Sachverhalte</li>
+                                        <li>Erstellung kreativer oder fachlicher Texte</li>
+                                        <li>Wenn Qualität wichtiger als Geschwindigkeit ist</li>
+                                    </ul>
+                                </div>
                             </div>
-                             <div>
-                                <h4 class="font-semibold text-lg">GPT-4o: Der kreative Experte</h4>
-                                <p class="text-sm text-slate-600 mt-1">In der kostenlosen Version oft mit Nutzungslimit. Dieses Modell ist deutlich "intelligenter", versteht komplexe Anweisungen besser und liefert nuanciertere Ergebnisse.</p>
-                                <ul class="text-sm list-disc list-inside mt-2 space-y-1">
-                                    <li>Analyse komplexer Sachverhalte</li>
-                                    <li>Erstellung kreativer oder fachlich tiefer Texte</li>
-                                    <li>Wenn höchste Qualität wichtiger als Geschwindigkeit ist</li>
-                                    <li>Lösen von Logik-Rätseln oder komplexen Aufgaben</li>
-                                </ul>
-                            </div>
                         </div>
-                    </div>
-                </div>
-                 <div class="card p-6">
-                    <h3 class="text-xl font-bold mb-2 text-center">Aufwand vs. Ergebnisqualität</h3>
-                    <div class="chart-container relative mx-auto w-full max-w-2xl h-64 md:h-80">
-                        <canvas id="gigoChart"></canvas>
-                    </div>
-                 </div>
-            </section>
-
-            <!-- SECTION: Prompt-Architektur -->
-            <section id="architektur" class="content-section">
-                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-2">Die Architektur eines perfekten Prompts</h2>
-                    <p class="max-w-3xl mx-auto text-slate-600">Hier lernt Ihr die Bausteine und Techniken kennen, um Anweisungen zu formulieren, die zu exzellenten Ergebnissen führen. Vom grundlegenden Aufbau bis zum "Universalprompt", der die KI für Euch arbeiten lässt.</p>
-                </div>
-
-                <div class="card p-8 mb-12">
-                    <h3 class="text-2xl font-bold text-center mb-6">Die 3 Faktoren eines Top-Prompts</h3>
-                    <div class="grid md:grid-cols-3 gap-6 text-center">
-                        <div>
-                            <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">1</div>
-                            <h4 class="font-bold text-lg">Kontext</h4>
-                            <p class="text-sm text-slate-600">Gebt der KI eine Rolle ("Agiere als..."). Das schärft ihre Perspektive und den Fokus.</p>
-                        </div>
-                        <div>
-                            <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">2</div>
-                            <h4 class="font-bold text-lg">Anweisung</h4>
-                            <p class="text-sm text-slate-600">Seid ultra-spezifisch: Was soll die Aufgabe sein? Welches Format (Liste, Tabelle, JSON)?</p>
-                        </div>
-                        <div>
-                            <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">3</div>
-                            <h4 class="font-bold text-lg">Ziel</h4>
-                            <p class="text-sm text-slate-600">Definiert die Zielgruppe (C-Level, Techniker). Das bestimmt Stil und Komplexität.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-8 mb-12 bg-amber-50 border border-amber-200">
-                    <h3 class="text-2xl font-bold text-center mb-4">✨ Game Changer: Der interaktive Universalprompt-Coach</h3>
-                    <p class="text-center text-slate-600 mb-6">Lasst die KI für Euch arbeiten! Beschreibt Euer Ziel, und der KI-Coach entwickelt den perfekten Prompt für Euch.</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label for="userGoal" class="block text-sm font-medium text-slate-700">1. Was möchtet Ihr erreichen?</label>
-                            <input type="text" id="userGoal" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. eine Marketing-E-Mail für ein neues Produkt schreiben">
-                        </div>
-                        <div>
-                            <label for="userContext" class="block text-sm font-medium text-slate-700">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
-                            <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTER FRIES">
-                        </div>
-                        <button id="generateUniversalPrompt" class="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            ✨ Prompt vom KI-Coach entwickeln lassen
-                        </button>
-                    </div>
-
-                    <div id="universalPromptResult" class="mt-6 hidden">
-                        <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                             <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('universalPromptOutput')">Kopieren</button>
-                             <pre id="universalPromptOutput" class="whitespace-pre-wrap"></pre>
-                        </div>
-                    </div>
-                     <div id="universalPromptLoader" class="hidden mt-6 flex justify-center items-center">
-                        <div class="loader"></div>
-                        <p class="ml-4 text-slate-600">KI-Coach entwickelt den Prompt...</p>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-2xl font-bold text-center mb-6">Praxis-Showcase: Prompts in Aktion</h3>
-                    <div id="showcase-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Showcase cards will be injected here by JS -->
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- SECTION: Sicherheit -->
-            <section id="sicherheit" class="content-section">
-                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-2">Sicherheits-Hub: Verantwortungsvoller Einsatz</h2>
-                    <p class="max-w-3xl mx-auto text-slate-600">Der Einsatz von KI im Unternehmen erfordert klare Regeln. Hier lernt Ihr die entscheidenden Do's und Don'ts, um ChatGPT sicher und im Einklang mit unseren Richtlinien zu nutzen.</p>
-                </div>
-                <div class="card p-8 mb-12 bg-rose-50 border border-rose-200">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-rose-800">Die goldene Regel der Compliance</h3>
-                    <p class="text-center text-2xl font-semibold">KEINE sensiblen, vertraulichen oder personenbezogenen Daten eingeben! Niemals!</p>
-                    <p class="text-center text-slate-600 mt-2">Alles, was Ihr eingebt, kann potenziell zum Training zukünftiger Modelle verwendet werden. Es gibt keine Garantie für Vertraulichkeit.</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-8 mb-12">
-                    <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-4 text-teal-700">✅ Do's (Die Gebote)</h3>
-                        <ul class="space-y-3 list-inside">
-                            <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><span>**Anonymisieren:** Immer Platzhalter statt echter Namen, Zahlen oder Projektdetails verwenden.</span></li>
-                            <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><span>**Verifizieren:** Fakten, Zahlen und Quellen IMMER prüfen. Eure Fachkompetenz ist entscheidend.</span></li>
-                            <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><span>**Transparenz:** Seid transparent, wenn Ihr KI-generierte Inhalte als Grundlage nutzt.</span></li>
-                            <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><span>**Effizienz nutzen:** Ideal für Brainstorming, Strukturierung und als intelligenter Sparringspartner.</span></li>
-                        </ul>
                     </div>
                      <div class="card p-6">
-                        <h3 class="text-xl font-bold mb-4 text-rose-700">❌ Don'ts (Die Verbote)</h3>
-                        <ul class="space-y-3 list-inside">
-                           <li class="flex items-start"><span class="text-rose-500 mr-2">✖</span><span>**Kein blindes Vertrauen:** Niemals Ergebnisse ungeprüft kopieren und weiterleiten.</span></li>
-                           <li class="flex items-start"><span class="text-rose-500 mr-2">✖</span><span>**Kein Ersatz für Expertise:** ChatGPT ist ein Werkzeug, kein Experte. Euer Urteil zählt.</span></li>
-                           <li class="flex items-start"><span class="text-rose-500 mr-2">✖</span><span>**Keine Urheberrechtsverletzungen:** Vorsicht bei der Generierung von Inhalten, die auf geschütztem Material basieren könnten.</span></li>
-                           <li class="flex items-start"><span class="text-rose-500 mr-2">✖</span><span>**Keine endgültigen Entscheidungen:** Die KI assistiert, aber sie entscheidet nicht.</span></li>
-                        </ul>
-                    </div>
-                </div>
-                 <div class="card p-8">
-                    <h3 class="text-xl font-bold mb-4 text-center">Die Kunst der Anonymisierung: Ein Beispiel</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-rose-100 p-4 rounded-lg">
-                            <p class="font-bold text-rose-800 mb-2">Vorher (UNSICHER)</p>
-                            <p class="text-sm">"Fasse das Meeting mit der Meier AG vom 08.06. über die Probleme bei Projekt 'Titan' zusammen."</p>
+                        <h3 class="text-xl font-bold mb-4 text-center">Aufwand vs. Ergebnisqualität</h3>
+                        <div class="chart-container relative mx-auto w-full max-w-2xl h-64 md:h-80">
+                            <canvas id="gigoChart"></canvas>
                         </div>
-                        <div class="bg-teal-100 p-4 rounded-lg">
-                            <p class="font-bold text-teal-800 mb-2">Nachher (SICHER)</p>
-                            <p class="text-sm">"Fasse ein fiktives Meeting mit einem 'Kunden aus dem Maschinenbau' über 'Lieferverzögerungen bei einem strategischen Projekt' zusammen."</p>
+                     </div>
+                </section>
+                
+                <section id="architektur" class="content-section">
+                     <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Die Architektur eines perfekten Prompts</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Hier lernt Ihr die Bausteine und Techniken kennen, um Anweisungen zu formulieren, die zu exzellenten Ergebnissen führen. Vom grundlegenden Aufbau bis zum "Universalprompt", der die KI für Euch arbeiten lässt.</p>
+                    </div>
+                    <div class="card p-8 mb-12">
+                        <h3 class="text-2xl font-bold text-center mb-6">Die 3 Faktoren eines Top-Prompts</h3>
+                        <div class="grid md:grid-cols-3 gap-6 text-center">
+                            <div>
+                                <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">1</div>
+                                <h4 class="font-bold text-lg">Kontext</h4>
+                                <p class="text-sm text-slate-600">Gebt der KI eine Rolle ("Agiere als..."). Das schärft ihre Perspektive und den Fokus.</p>
+                            </div>
+                            <div>
+                                <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">2</div>
+                                <h4 class="font-bold text-lg">Anweisung</h4>
+                                <p class="text-sm text-slate-600">Seid ultra-spezifisch: Was soll die Aufgabe sein? Welches Format (Liste, Tabelle, JSON)?</p>
+                            </div>
+                            <div>
+                                <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">3</div>
+                                <h4 class="font-bold text-lg">Ziel</h4>
+                                <p class="text-sm text-slate-600">Definiert die Zielgruppe (C-Level, Techniker). Das bestimmt Stil und Komplexität.</p>
+                            </div>
                         </div>
                     </div>
-                 </div>
-            </section>
+                    <div class="card p-8 mb-12 bg-amber-50 border border-amber-200">
+                        <h3 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2">✨ Game Changer: Der interaktive Universalprompt-Coach</h3>
+                        <p class="text-center text-slate-600 mb-6">Lasst die KI für Euch arbeiten! Beschreibt Euer Ziel, und der KI-Coach entwickelt den perfekten Prompt für Euch.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="userGoal" class="block text-sm font-medium text-slate-700">1. Was möchtet Ihr erreichen?</label>
+                                <input type="text" id="userGoal" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. eine Marketing-E-Mail für ein neues Produkt schreiben">
+                            </div>
+                            <div>
+                                <label for="userContext" class="block text-sm font-medium text-slate-700">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
+                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTER FRIES">
+                            </div>
+                            <button id="generateUniversalPrompt" class="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                ✨ Prompt vom KI-Coach entwickeln lassen
+                            </button>
+                        </div>
+                        <div id="universalPromptResult" class="mt-6 hidden">
+                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
+                                 <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('universalPromptOutput')">Kopieren</button>
+                                 <pre id="universalPromptOutput" class="whitespace-pre-wrap"></pre>
+                            </div>
+                        </div>
+                         <div id="universalPromptLoader" class="hidden mt-6 flex justify-center items-center">
+                            <div class="loader"></div>
+                            <p class="ml-4 text-slate-600">KI-Coach entwickelt den Prompt...</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-6 mt-12">Praxis-Showcase: Prompts in Aktion</h3>
+                        <div id="showcase-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="advanced" class="content-section">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Fortgeschrittene Prompt-Techniken</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Meistert diese Techniken, um die KI zu Höchstleistungen anzuspornen und Eure Analyse-Workflows zu automatisieren.</p>
+                    </div>
+                    <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>Chain-of-Thought (CoT)</h3>
+                            <p class="text-sm">Weist die KI an, ihre "Gedankenkette" offenzulegen, indem Ihr am Ende eines Prompts hinzufügt: `"Denk Schritt für Schritt nach."`. Das verbessert die logische Herleitung bei komplexen Problemen und macht die Ergebnisse nachvollziehbarer.</p>
+                        </div>
+                        <div class="card p-6">
+                             <h3 class="text-xl font-bold mb-2 text-sky-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Few-Shot Prompting</h3>
+                            <p class="text-sm">Zeigt der KI genau, was Ihr wollt, indem Ihr 2-3 Beispiele direkt in den Prompt schreibt. Beispiel: `Übersetze: Apfel -> Apple; Haus -> House; Auto -> ?`. Die KI lernt das Muster und wendet es an.</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-2 text-indigo-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18h.01"/><path d="M16 12h-4"/><path d="M16 15h-4"/><path d="M10 9h1"/></svg>Strukturierte Daten</h3>
+                            <p class="text-sm">Fordert explizit maschinenlesbare Formate an, z.B. `"Gib die Ergebnisse als JSON-Objekt aus."` oder `"Formatiere die Analyse als Markdown-Tabelle."`. Das ist ideal, um Daten direkt in Excel oder andere Systeme zu importieren.</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="library" class="content-section">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Die interne Prompt-Bibliothek</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Standardisiert Qualität und Effizienz, indem Ihr Euer Wissen bündelt. Eine Sammlung der besten Prompts für wiederkehrende Aufgaben ist ein Schlüssel, um individuelle Stärke in organisatorischen Erfolg umzuwandeln.</p>
+                    </div>
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-bold text-center mb-6">Warum eine Prompt-Bibliothek?</h3>
+                        <div class="grid md:grid-cols-3 gap-8 text-center">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-teal-600"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                <h4 class="font-bold text-lg">Qualitätssicherung</h4>
+                                <p class="text-sm text-slate-600">Stellt sicher, dass alle im Team auf erprobte und optimierte Prompts zugreifen, was zu konsistent hochwertigen Ergebnissen führt.</p>
+                            </div>
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-sky-600"><path d="M15 14c.2-1 .7-1.7 1.5-2.5C17.7 10.2 19 9.3 19 8c0-1.7-1.3-3-3-3S13 6.3 13 8c0 .2.3.5.3.6"/><path d="M10 14c.2-1 .7-1.7 1.5-2.5C12.7 10.2 14 9.3 14 8c0-1.7-1.3-3-3-3S8 6.3 8 8c0 .2.3.5.3.6"/><path d="M5 14c.2-1 .7-1.7 1.5-2.5C7.7 10.2 9 9.3 9 8c0-1.7-1.3-3-3-3S3 6.3 3 8c0 .2.3.5.3.6"/><path d="M21 14a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-4Z"/></svg>
+                                <h4 class="font-bold text-lg">Wissenstransfer</h4>
+                                <p class="text-sm text-slate-600">Beschleunigt die Einarbeitung neuer Kollegen und verteilt das Know-how von erfahrenen Nutzern auf das gesamte Team.</p>
+                            </div>
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-indigo-600"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                                <h4 class="font-bold text-lg">Effizienzsteigerung</h4>
+                                <p class="text-sm text-slate-600">Reduziert den Zeitaufwand für Routineaufgaben, da nicht jeder das Rad neu erfinden muss. Einfach den passenden Prompt kopieren und anpassen.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="sicherheit" class="content-section">
+                     <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Sicherheit, Ethik & Grenzen</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Der Einsatz von KI erfordert nicht nur technische, sondern auch ethische Kompetenz. Hier lernt Ihr die entscheidenden Regeln für einen verantwortungsvollen Umgang.</p>
+                    </div>
+                    <div class="card p-8 mb-12 bg-rose-50 border border-rose-200">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-rose-800 flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Die goldene Regel der Compliance</h3>
+                        <p class="text-center text-2xl font-semibold">KEINE sensiblen, vertraulichen oder personenbezogenen Daten eingeben! Niemals!</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-4 text-teal-700">✅ Do's (Die Gebote)</h3>
+                             <ul class="space-y-3 list-inside">
+                                <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Anonymisieren:** Immer Platzhalter statt echter Namen, Zahlen oder Projektdetails verwenden.</span></li>
+                                <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Verifizieren:** Fakten, Zahlen und Quellen IMMER prüfen. Eure Fachkompetenz ist entscheidend.</span></li>
+                                <li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✔</span><span>**Transparenz:** Seid transparent, wenn Ihr KI-generierte Inhalte als Grundlage nutzt.</span></li>
+                            </ul>
+                        </div>
+                         <div class="card p-6">
+                            <h3 class="text-xl font-bold mb-4 text-rose-700">❌ Don'ts (Die Verbote)</h3>
+                             <ul class="space-y-3 list-inside">
+                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein blindes Vertrauen:** Niemals Ergebnisse ungeprüft kopieren und weiterleiten.</span></li>
+                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Kein Ersatz für Expertise:** ChatGPT ist ein Werkzeug, kein Experte. Euer Urteil zählt.</span></li>
+                               <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✖</span><span>**Keine endgültigen Entscheidungen:** Die KI assistiert, aber sie entscheidet nicht.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="card p-8">
+                         <h3 class="text-2xl font-bold text-center mb-6">Ethik & kritische Reflexion</h3>
+                         <div class="grid md:grid-cols-3 gap-8">
+                             <div class="text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-amber-600"><path d="M12 3v18"/><path d="M17 5.5h-5.2a2 2 0 0 0-1.9 1.3l-1.8 5.4a2 2 0 0 1-1.9 1.3H2"/><path d="M7 18.5h5.2a2 2 0 0 0 1.9-1.3l1.8-5.4a2 2 0 0 1 1.9-1.3H22"/></svg>
+                                 <h4 class="font-bold">Umgang mit Bias</h4>
+                                 <p class="text-sm text-slate-600">Seid Euch bewusst, dass die KI Vorurteile aus ihren Trainingsdaten reproduzieren kann. Hinterfragt stereotype Antworten kritisch und fordert gezielt neutrale oder multiperspektivische Darstellungen an.</p>
+                             </div>
+                             <div class="text-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-amber-600"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                 <h4 class="font-bold">Grenzen des "Verständnisses"</h4>
+                                 <p class="text-sm text-slate-600">Die KI versteht nicht den tieferen Sinn oder die ethischen Implikationen Eurer Anfrage. Sie kombiniert nur Wörter. Komplexe moralische oder strategische Abwägungen bleiben Eure Aufgabe.</p>
+                             </div>
+                             <div class="text-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-amber-600"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                 <h4 class="font-bold">Menschliche Aufsicht</h4>
+                                 <p class="text-sm text-slate-600">Jedes KI-generierte Ergebnis, das an Mandanten geht oder als Grundlage für Entscheidungen dient, muss von einem Menschen mit Fachexpertise geprüft und freigegeben werden. Ihr seid die letzte Instanz.</p>
+                             </div>
+                         </div>
+                     </div>
+                 </section>
+                 
+                <section id="teams" class="content-section">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold mb-2">Team-Szenarien & Case Studies</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600">Hier findet Ihr maßgeschneiderte Übungsaufgaben und Fallbeispiele für die WALTER FRIES Gruppe. Nutzt sie, um Eure neuen Fähigkeiten direkt anzuwenden.</p>
+                    </div>
+                    <div id="team-accordion" class="space-y-4">
+                        <!-- New Case Study Accordion -->
+                        <div class="card">
+                            <div class="p-4 cursor-pointer bg-slate-100 rounded-t-lg flex justify-between items-center" data-accordion-toggle="case-study">
+                                <h3 class="text-xl font-bold text-indigo-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 6H3"/><path d="M10 12H3"/><path d="M10 18H3"/><path d="m14 6 7 6-7 6"/></svg>Case Study: KI-gestützte Marktrecherche</h3>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </div>
+                            <div class="p-6 hidden space-y-6" data-accordion-content="case-study">
+                                <div class="prose prose-slate max-w-none">
+                                    <p>Dieses Fallbeispiel zeigt, wie ein typischer Rechercheprozess für ein neues Mandat mit KI-Unterstützung aussehen kann, um die initiale Analysephase erheblich zu beschleunigen.</p>
+                                    <h4>Phase 1: Marktüberblick</h4>
+                                    <p><strong>Ziel:</strong> Schnelle Erfassung von Marktgröße, Hauptakteuren und Trends.</p>
+                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Agiere als Marktforschungsanalyst. Gib mir einen Überblick über den deutschen Markt für [Branche des Targets, z.B. 'Software für Medizintechnik']. Konzentriere dich auf: Marktgröße (Umsatz, Wachstumsprognose), Hauptakteure und die drei wichtigsten Technologietrends der letzten 2 Jahre.</code></pre>
+                                    <h4>Phase 2: Wettbewerbsanalyse</h4>
+                                    <p><strong>Ziel:</strong> Stärken und Schwächen potenzieller Wettbewerber identifizieren.</p>
+                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Vergleiche die folgenden zwei fiktiven Wettbewerber im Bereich [Branche]: 'Innovatech GmbH' und 'SolidSolutions AG'. Erstelle eine Markdown-Tabelle mit den Spalten 'Merkmal', 'Innovatech Stärke/Schwäche', 'SolidSolutions Stärke/Schwäche'. Betrachte die Merkmale: Produktportfolio, Preisstrategie und bekannte Kunden.</code></pre>
+                                    <h4>Phase 3: Erste SWOT-Analyse</h4>
+                                    <p><strong>Ziel:</strong> Gesammelte Informationen zu einer ersten SWOT-Analyse verdichten.</p>
+                                    <pre class="bg-slate-800 text-white p-3 rounded-md text-sm"><code>Basierend auf den vorherigen Informationen, erstelle eine erste SWOT-Analyse (Stärken, Schwächen, Chancen, Risiken) für ein fiktives Target-Unternehmen, die 'MedTech Innovators GmbH', das in diesem Markt agiert. Gib für jeden der vier Bereiche zwei relevante Stichpunkte an.</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </section>
 
-            <!-- SECTION: Teams -->
-            <section id="teams" class="content-section">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-2">Team-Szenarien: Die Theorie in der Praxis</h2>
-                    <p class="max-w-3xl mx-auto text-slate-600">Hier findet Ihr maßgeschneiderte Übungsaufgaben für die WALTER FRIES Gruppe. Nutzt die statischen Szenarien oder generiert mit der KI unendlich viele neue Ideen zum Üben.</p>
-                </div>
-                <div id="team-accordion" class="space-y-4">
-                    <!-- Team scenarios will be injected here by JS -->
-                </div>
-            </section>
-        </main>
+                 <section id="quiz" class="content-section">
+                    <div id="quiz-intro" class="active text-center card p-8">
+                        <h2 class="text-3xl font-bold mb-2">🏆 Willkommen zum Quiz-Battle!</h2>
+                        <p class="max-w-3xl mx-auto text-slate-600 mb-6">Testet Euer Wissen in einem freundschaftlichen Wettbewerb! Wir spielen einen 30-Fragen-Parcours. Pro Frage hat das zufällig ausgewählte Team 30 Sekunden Zeit zum Antworten. Welches Team wird der Prompting-Champion?</p>
+                        <button id="start-quiz-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-xl">Battle starten!</button>
+                    </div>
+                    <div id="quiz-game" class="hidden card p-6 md:p-8">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+                            <div class="flex justify-center gap-4 md:gap-6 order-2 md:order-1">
+                                <div id="score-fpm" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-teal-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team FPM</p></div>
+                                <div id="score-backoffice" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-sky-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team Backoffice</p></div>
+                                <div id="score-mna" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-rose-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team M&A</p></div>
+                            </div>
+                            <div class="text-center order-1 md:order-2">
+                                <p id="quiz-timer" class="font-bold text-slate-800 text-3xl md:text-4xl">30</p>
+                                <p class="text-xs tracking-wider">SEKUNDEN</p>
+                            </div>
+                        </div>
+                        <div id="turn-indicator" class="text-center mb-6 h-12 flex items-center justify-center">
+                            <h3 id="turn-text" class="text-2xl font-bold transition-transform duration-300"></h3>
+                        </div>
+                        <div id="question-container">
+                            <p class="text-sm text-slate-500 mb-2 text-center">Frage <span id="question-number">1</span> von 30</p>
+                            <h3 id="question-text" class="text-xl md:text-2xl font-semibold mb-6 text-center min-h-[6rem]"></h3>
+                            <div id="answer-options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                            <p id="answer-rationale" class="text-sm mt-4 p-3 bg-slate-100 rounded-lg hidden text-center"></p>
+                        </div>
+                    </div>
+                    <div id="quiz-results" class="hidden text-center card p-8">
+                        <h2 class="text-3xl font-bold mb-2">Das Battle ist vorbei!</h2>
+                        <div class="text-7xl my-4">🏆</div>
+                        <p class="text-xl mb-4">Herzlichen Glückwunsch an</p>
+                        <h3 id="winner-team" class="text-4xl font-bold mb-8"></h3>
+                        <div class="flex justify-center gap-8 mb-8">
+                            <div id="final-score-fpm" class="text-center"><p class="font-bold text-teal-600 text-3xl">0</p><p>Team FPM</p></div>
+                            <div id="final-score-backoffice" class="text-center"><p class="font-bold text-sky-600 text-3xl">0</p><p>Team Backoffice</p></div>
+                            <div id="final-score-mna" class="text-center"><p class="font-bold text-rose-600 text-3xl">0</p><p>Team M&A</p></div>
+                        </div>
+                        <button id="restart-quiz" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Erneut spielen</button>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
-
-    <!-- Modal Structure -->
+    
+    <!-- Modal and Toast HTML remains unchanged -->
     <div id="promptModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -293,77 +391,68 @@
             </div>
         </div>
     </div>
-
-    <!-- Custom Notification Toast -->
-    <div id="toast-notification" class="hidden fixed bottom-5 right-5 py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 z-50">
-        <span id="toast-message"></span>
-    </div>
-
+    <div id="toast-notification" class="hidden fixed bottom-5 right-5 py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 z-50"><span id="toast-message"></span></div>
 
     <script>
-        // --- UTILITY FUNCTIONS ---
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            const toastMessage = document.getElementById('toast-message');
-            
-            toastMessage.innerText = message;
-            
-            toast.classList.remove('bg-teal-600', 'bg-rose-600', 'text-white');
-            
-            if (type === 'success') {
-                toast.classList.add('bg-teal-600', 'text-white');
-            } else { // error
-                toast.classList.add('bg-rose-600', 'text-white');
-            }
-            
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        function copyToClipboard(elementId) {
-            const textToCopy = document.getElementById(elementId).innerText;
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = textToCopy;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-            showToast('Prompt in die Zwischenablage kopiert!');
-        }
-
-        const callGemini = async (prompt) => {
-            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-            const payload = { contents: chatHistory };
-            const apiKey = "AIzaSyBUE7bGnlayeXWg2_ONFVoT_SHnqptl2fE";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    throw new Error(`API call failed with status: ${response.status}`);
-                }
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                }
-                return "Leider konnte keine Antwort generiert werden.";
-            } catch (error) {
-                console.error("Gemini API call failed:", error);
-                return "Fehler bei der API-Anfrage. Bitte überprüfen Sie die Browser-Konsole.";
-            }
-        };
-
-
         document.addEventListener('DOMContentLoaded', function() {
+            // All JavaScript logic from the previous quiz version goes here.
+            // This includes navigation, charts, modals, Gemini API calls, and the Quiz Battle.
+            // --- UTILITY FUNCTIONS ---
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast-notification');
+                const toastMessage = document.getElementById('toast-message');
+                toastMessage.innerText = message;
+                toast.classList.remove('bg-teal-600', 'bg-rose-600', 'text-white');
+                if (type === 'success') {
+                    toast.classList.add('bg-teal-600', 'text-white');
+                } else {
+                    toast.classList.add('bg-rose-600', 'text-white');
+                }
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+
+            function copyToClipboard(elementId) {
+                const textToCopy = document.getElementById(elementId).innerText;
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                showToast('Prompt in die Zwischenablage kopiert!');
+            }
+
+            const callGemini = async (prompt) => {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyBUE7bGnlayeXWg2_ONFVoT_SHnqptl2fE";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                    return "Leider konnte keine Antwort generiert werden.";
+                } catch (error) {
+                    console.error("Gemini API call failed:", error);
+                    return "Fehler bei der API-Anfrage. Bitte überprüfen Sie die Browser-Konsole.";
+                }
+            };
+
             // --- INITIALIZATION ---
             const navItems = document.querySelectorAll('.nav-item');
             const contentSections = document.querySelectorAll('.content-section');
-
             navItems.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetId = item.getAttribute('data-target');
@@ -376,22 +465,25 @@
             });
 
             // GIGO Chart
-            const ctx = document.getElementById('gigoChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Vager Prompt', 'Präziser Prompt'],
-                    datasets: [{
-                        label: 'Aufwand', data: [2, 6], backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: 'rgba(251, 191, 36, 1)', borderWidth: 1
-                    }, {
-                        label: 'Ergebnisqualität', data: [3, 9], backgroundColor: 'rgba(20, 184, 166, 0.6)', borderColor: 'rgba(15, 118, 110, 1)', borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    scales: { x: { beginAtZero: true, max: 10, title: { display: true, text: 'Skala (1-10)' } } },
-                }
-            });
+            const gigoChartEl = document.getElementById('gigoChart');
+            if (gigoChartEl) {
+                const ctx = gigoChartEl.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Vager Prompt', 'Präziser Prompt'],
+                        datasets: [{
+                            label: 'Aufwand', data: [2, 6], backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: 'rgba(251, 191, 36, 1)', borderWidth: 1
+                        }, {
+                            label: 'Ergebnisqualität', data: [3, 9], backgroundColor: 'rgba(20, 184, 166, 0.6)', borderColor: 'rgba(15, 118, 110, 1)', borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: { x: { beginAtZero: true, max: 10, title: { display: true, text: 'Skala (1-10)' } } },
+                    }
+                });
+            }
 
             // Showcase Data
             const showcaseData = [
@@ -403,13 +495,15 @@
                 { title: "Techniken kombiniert", prompt: "Agiere als Experte für Vergütung im deutschen Mittelstand. Analysiere eine fiktive Situation. Schreibe eine formelle E-Mail an die Geschäftsführung, in der Du Deine Empfehlungen darlegst. Denk Schritt für Schritt nach, bevor Du die finale E-Mail formulierst.", analysis: "Dieser Prompt ist ein Meisterstück: Er kombiniert Rollenspiel ('Experte'), Zielgruppendefinition ('formelle E-Mail an GF') und die fortgeschrittene 'Chain-of-Thought'-Technik, um die Analyse-Qualität zu maximieren." }
             ];
             const showcaseGrid = document.getElementById('showcase-grid');
-            showcaseData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card p-6 cursor-pointer';
-                card.innerHTML = `<h4 class="font-bold text-lg text-teal-700">${item.title}</h4><p class="text-sm text-slate-600 mt-2">${item.prompt.substring(0, 80)}...</p>`;
-                card.addEventListener('click', () => openModal(item.title, item.prompt, item.analysis));
-                showcaseGrid.appendChild(card);
-            });
+            if (showcaseGrid) {
+                showcaseData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-6 cursor-pointer';
+                    card.innerHTML = `<h4 class="font-bold text-lg text-teal-700">${item.title}</h4><p class="text-sm text-slate-600 mt-2">${item.prompt.substring(0, 80)}...</p>`;
+                    card.addEventListener('click', () => openModal(item.title, item.prompt, item.analysis));
+                    showcaseGrid.appendChild(card);
+                });
+            }
             
             // Team Scenarios Data - Customized for WALTER FRIES
             const teamData = [
@@ -430,75 +524,92 @@
                 }
             ];
             const teamAccordion = document.getElementById('team-accordion');
-            teamData.forEach((data, index) => {
-                const item = document.createElement('div');
-                item.className = 'card';
-                item.innerHTML = `
-                    <div class="p-4 cursor-pointer bg-slate-100 rounded-t-lg flex justify-between items-center" data-accordion-toggle="${index}">
-                        <h3 class="text-xl font-bold">${data.team}</h3>
-                        <span class="transform transition-transform duration-300">▼</span>
-                    </div>
-                    <div class="p-6 hidden space-y-6" data-accordion-content="${index}">
-                        <div class="bg-slate-50 p-4 rounded-lg border">
-                            <h4 class="font-bold text-${data.color}-700">${data.basis.title}</h4>
-                            <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                                <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-basis')">Kopieren</button>
-                                <pre id="team${index}-basis" class="whitespace-pre-wrap">${data.basis.prompt}</pre>
+            if(teamAccordion) {
+                 const caseStudyAccordion = teamAccordion.querySelector('[data-accordion-toggle="case-study"]');
+                 if(caseStudyAccordion) {
+                    caseStudyAccordion.addEventListener('click', () => {
+                        const content = caseStudyAccordion.nextElementSibling;
+                        const arrow = caseStudyAccordion.querySelector('span');
+                        content.classList.toggle('hidden');
+                        arrow.classList.toggle('rotate-180');
+                    });
+                 }
+
+                teamData.forEach((data, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'card';
+                    item.innerHTML = `
+                        <div class="p-4 cursor-pointer bg-slate-100 rounded-t-lg flex justify-between items-center" data-accordion-toggle="${index}">
+                            <h3 class="text-xl font-bold">${data.team}</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="p-6 hidden space-y-6" data-accordion-content="${index}">
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h4 class="font-bold text-${data.color}-700">${data.basis.title}</h4>
+                                <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
+                                    <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-basis')">Kopieren</button>
+                                    <pre id="team${index}-basis" class="whitespace-pre-wrap">${data.basis.prompt}</pre>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border">
+                                <h4 class="font-bold text-${data.color}-700">${data.experte.title}</h4>
+                                 <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
+                                    <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-experte')">Kopieren</button>
+                                    <pre id="team${index}-experte" class="whitespace-pre-wrap">${data.experte.prompt}</pre>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                                 <h4 class="font-bold text-amber-800">✨ Szenario-Generator</h4>
+                                 <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für Euer Team erstellen.</p>
+                                 <button id="generateScenario-${data.teamId}" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
+                                    ✨ Neues Szenario für ${data.team} generieren
+                                 </button>
+                                 <div id="scenarioLoader-${data.teamId}" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
+                                 <div id="scenarioResult-${data.teamId}" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
                             </div>
                         </div>
-                        <div class="bg-slate-50 p-4 rounded-lg border">
-                            <h4 class="font-bold text-${data.color}-700">${data.experte.title}</h4>
-                             <div class="mt-2 bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                                <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('team${index}-experte')">Kopieren</button>
-                                <pre id="team${index}-experte" class="whitespace-pre-wrap">${data.experte.prompt}</pre>
-                            </div>
-                        </div>
-                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                             <h4 class="font-bold text-amber-800">✨ Szenario-Generator</h4>
-                             <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für Euer Team erstellen.</p>
-                             <button id="generateScenario-${data.teamId}" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
-                                ✨ Neues Szenario für ${data.team} generieren
-                             </button>
-                             <div id="scenarioLoader-${data.teamId}" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                             <div id="scenarioResult-${data.teamId}" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
-                        </div>
-                    </div>
-                `;
-                teamAccordion.appendChild(item);
-            });
+                    `;
+                    teamAccordion.appendChild(item);
+                });
+            }
             
             document.querySelectorAll('[data-accordion-toggle]').forEach(button => {
                 button.addEventListener('click', () => {
                     const content = button.nextElementSibling;
                     const arrow = button.querySelector('span');
-                    content.classList.toggle('hidden');
-                    arrow.classList.toggle('rotate-180');
+                    if (content) {
+                        content.classList.toggle('hidden');
+                    }
+                    if (arrow) {
+                        arrow.classList.toggle('rotate-180');
+                    }
                 });
             });
             
             // Universal Prompt Handler
-            document.getElementById('generateUniversalPrompt').addEventListener('click', async () => {
-                const userGoal = document.getElementById('userGoal').value;
-                const userContext = document.getElementById('userContext').value;
-                const resultDiv = document.getElementById('universalPromptResult');
-                const loader = document.getElementById('universalPromptLoader');
+            const generateUniversalPromptBtn = document.getElementById('generateUniversalPrompt');
+            if (generateUniversalPromptBtn) {
+                generateUniversalPromptBtn.addEventListener('click', async () => {
+                    const userGoal = document.getElementById('userGoal').value;
+                    const userContext = document.getElementById('userContext').value;
+                    const resultDiv = document.getElementById('universalPromptResult');
+                    const loader = document.getElementById('universalPromptLoader');
 
-                if (!userGoal || !userContext) {
-                    showToast('Bitte füllt beide Felder aus.', 'error');
-                    return;
-                }
+                    if (!userGoal || !userContext) {
+                        showToast('Bitte füllt beide Felder aus.', 'error');
+                        return;
+                    }
 
-                const prompt = `Du bist ein Prompt-Engineer für den Bereich "${userContext}". Dein Ziel ist es, mir dabei zu helfen, den bestmöglichen Prompt für mein Ziel zu schreiben. Mein Ziel ist: "${userGoal}". Folge diesem Prozess: Deine erste Antwort wird darin bestehen, mir zu helfen, meinen initialen Gedanken zu verbessern. Generiere dafür 4 Abschnitte: a) Deine Rolle als Assistent (z.B. "Du bist ein erfahrener [Rolle]..."), b) Überarbeiteter Prompt (Dein Vorschlag für den optimierten Prompt), c) Vorschläge (Was kann ich noch hinzufügen, um den Prompt zu verbessern?), d) Fragen (Welche Infos brauchst Du noch von mir?). Formatiere die Antwort klar und übersichtlich in der Du-Ansprache.`;
+                    const prompt = `Du bist ein Prompt-Engineer für den Bereich "${userContext}". Dein Ziel ist es, mir dabei zu helfen, den bestmöglichen Prompt für mein Ziel zu schreiben. Mein Ziel ist: "${userGoal}". Folge diesem Prozess: Deine erste Antwort wird darin bestehen, mir zu helfen, meinen initialen Gedanken zu verbessern. Generiere dafür 4 Abschnitte: a) Deine Rolle als Assistent (z.B. "Du bist ein erfahrener [Rolle]..."), b) Überarbeiteter Prompt (Dein Vorschlag für den optimierten Prompt), c) Vorschläge (Was kann ich noch hinzufügen, um den Prompt zu verbessern?), d) Fragen (Welche Infos brauchst Du noch von mir?). Formatiere die Antwort klar und übersichtlich in der Du-Ansprache.`;
 
-                loader.classList.remove('hidden');
-                resultDiv.classList.add('hidden');
-                
-                const responseText = await callGemini(prompt);
-                
-                document.getElementById('universalPromptOutput').innerText = responseText;
-                loader.classList.add('hidden');
-                resultDiv.classList.remove('hidden');
-            });
+                    loader.classList.remove('hidden');
+                    resultDiv.classList.add('hidden');
+                    const responseText = await callGemini(prompt);
+                    document.getElementById('universalPromptOutput').innerText = responseText;
+                    loader.classList.add('hidden');
+                    resultDiv.classList.remove('hidden');
+                });
+            }
 
             // Scenario Generator Handler
             document.querySelectorAll('[id^="generateScenario-"]').forEach(button => {
@@ -526,22 +637,178 @@
                     }
                 });
             });
+
+            // Modal Logic
+            const modal = document.getElementById('promptModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            if (modal && closeModalBtn) {
+                 window.openModal = function (title, prompt, analysis) {
+                    document.getElementById('modalTitle').innerText = title;
+                    document.getElementById('modalPromptText').innerText = prompt;
+                    document.getElementById('modalAnalysis').innerText = analysis;
+                    modal.style.display = 'block';
+                }
+                closeModalBtn.onclick = () => modal.style.display = 'none';
+                window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
+            }
+            
+            // Quiz Logic
+            const quizQuestions = [
+                { question: "Was ist die 'goldene Regel' des Promptings?", answers: [{ text: "'Je länger, desto besser.'", correct: false }, { text: "'Garbage In, Garbage Out.'", correct: true }, { text: "'Kreativität vor Präzision.'", correct: false }, { text: "'Immer das neueste Modell nutzen.'", correct: false }] },
+                { question: "Ein KI-Modell erfindet ein überzeugendes, aber falsches Zitat. Wie nennt man dieses Phänomen?", answers: [{ text: "Bias", correct: false }, { text: "Wissensstopp", correct: false }, { text: "Halluzination", correct: true }, { text: "Kontextfehler", correct: false }] },
+                { question: "Welcher der 3 Faktoren eines Top-Prompts definiert die Zielgruppe und den Stil?", answers: [{ text: "Kontext", correct: false }, { text: "Anweisung", correct: false }, { text: "Ziel", correct: true }, { text: "Format", correct: false }] },
+                { question: "Welches kostenlose Modell eignet sich am besten für schnelle, einfache Aufgaben wie das Zusammenfassen von Texten?", answers: [{ text: "GPT-4o", correct: false }, { text: "GPT-3.5", correct: true }, { text: "Gemini Pro", correct: false }, { text: "Alle sind gleich schnell.", correct: false }] },
+                { question: "Was ist die oberste Priorität beim Einsatz von ChatGPT im Unternehmenskontext der WALTER FRIES Gruppe?", answers: [{ text: "Komplexe Fachfragen", correct: false }, { text: "Sensible oder vertrauliche Daten", correct: true }, { text: "Lange Texte zur Analyse", correct: false }, { text: "Anfragen zur Code-Erstellung", correct: false }] },
+                { question: "Ihr wollt eine Checkliste für die Mandatsannahme erstellen. Welcher Prompt ist am effektivsten?", answers: [{ text: "Gib mir eine Checkliste für die Mandatsannahme.", correct: false }, { text: "Was muss ich bei der Mandatsannahme beachten?", correct: false }, { text: "Erstelle eine Markdown-Tabelle mit den Spalten 'Schritt', 'Aufgabe' und 'Verantwortlich' zum Thema Mandatsannahme.", correct: true }, { text: "Fasse den SOP zur Mandatsannahme zusammen.", correct: false }] },
+                { question: "Was ist der Hauptvorteil, für jedes Mandat einen eigenen Chat zu verwenden?", answers: [{ text: "Es ist übersichtlicher für Euch.", correct: false }, { text: "ChatGPT lernt so schneller über alle Projekte hinweg.", correct: false }, { text: "Der gesamte Kontext eines Mandats bleibt im jeweiligen Chat erhalten.", correct: true }, { text: "Es erhöht die Antwortgeschwindigkeit.", correct: false }] },
+                { question: "Was ist der Zweck des 'Universalprompts'?", answers: [{ text: "Er beantwortet jede Frage sofort perfekt.", correct: false }, { text: "Er hilft Euch, den bestmöglichen Prompt für Euer Ziel zu entwickeln.", correct: true }, { text: "Er schaltet die Premium-Funktionen frei.", correct: false }, { text: "Er ist ein spezieller Befehl für die Datenanalyse.", correct: false }] },
+                { question: "Ihr erhaltet eine Antwort, die stereotype Formulierungen enthält. Worauf ist das zurückzuführen?", answers: [{ text: "Bias (Voreingenommenheit)", correct: true }, { text: "Eine Halluzination", correct: false }, { text: "Einen Fehler im Prompt", correct: false }, { text: "Den Wissensstopp des Modells", correct: false }] },
+                { question: "Welche der folgenden Anweisungen ist am präzisesten?", answers: [{ text: "Schreibe einen kurzen Text.", correct: false }, { text: "Erstelle eine Zusammenfassung in 3 Stichpunkten mit maximal 15 Wörtern pro Punkt.", correct: true }, { text: "Gib mir die wichtigsten Infos.", correct: false }, { text: "Mach das professioneller.", correct: false }] },
+                { question: "Für welche Aufgabe würdet Ihr eher das Modell GPT-4o anstatt GPT-3.5 verwenden?", answers: [{ text: "Eine schnelle Umformulierung einer E-Mail.", correct: false }, { text: "Die Analyse eines komplexen Vertragsentwurfs mit subtilen Risiken.", correct: true }, { text: "Eine Liste von 10 allgemeinen Marketing-Slogans.", correct: false }, { text: "Das Zusammenfassen eines internen Protokolls.", correct: false }] },
+                { question: "Was bedeutet die Anonymisierung eines Prompts?", answers: [{ text: "Den Prompt in einer anderen Sprache schreiben.", correct: false }, { text: "Fachbegriffe vermeiden.", correct: false }, { text: "Echte Namen, Firmen und Zahlen durch Platzhalter ersetzen.", correct: true }, { text: "Den Prompt möglichst kurz halten.", correct: false }] },
+                { question: "Die Technik, die Ausgabe eines Prompts als Eingabe für den nächsten zu verwenden, nennt man...", answers: [{ text: "Prompt Stacking", correct: false }, { text: "Prompt Chaining", correct: true }, { text: "Iterative Refinement", correct: false }, { text: "Context Loading", correct: false }] },
+                { question: "Was ist der Zweck der Anweisung 'Agiere als M&A-Berater der WALTER FRIES Gruppe'?", answers: [{ text: "Es schmeichelt der KI.", correct: false }, { text: "Es grenzt die Zielgruppe ein.", correct: false }, { text: "Es gibt der KI einen spezifischen Kontext und eine Rolle.", correct: true }, { text: "Es ist eine reine Stilvorgabe.", correct: false }] },
+                { question: "Warum ist es wichtig, die Ergebnisse von ChatGPT immer zu verifizieren?", answers: [{ text: "Weil die KI manchmal zu langsam ist.", correct: false }, { text: "Weil die KI halluzinieren und Bias enthalten kann.", correct:true }, { text: "Weil die kostenlose Version veraltet ist.", correct: false }, { text: "Weil die KI keine Tabellen formatieren kann.", correct: false }] },
+                { question: "Wofür steht die Abkürzung 'KI'?", answers: [{ text: "Kreative Intelligenz", correct: false }, { text: "Künstliche Intelligenz", correct: true }, { text: "Komplexe Intelligenz", correct: false }, { text: "Kybernetische Intelligenz", correct: false }] },
+                { question: "Welches Teilgebiet der KI befasst sich damit, dass Computer aus Daten lernen?", answers: [{ text: "Robotik", correct: false }, { text: "Neuronale Netze", correct: false }, { text: "Maschinelles Lernen (ML)", correct: true }, { text: "Computer Vision", correct: false }] },
+                { question: "Wer prägte den Begriff 'Künstliche Intelligenz'?", answers: [{ text: "Alan Turing", correct: false }, { text: "John McCarthy", correct: true }, { text: "Isaac Asimov", correct: false }, { text: "Geoffrey Hinton", correct: false }] },
+                { question: "Was beschreibt der 'Turing-Test'?", answers: [{ text: "Die Rechengeschwindigkeit eines Computers.", correct: false }, { text: "Die Fähigkeit einer Maschine, ein menschenähnliches Denkvermögen zu zeigen.", correct: true }, { text: "Die Effizienz eines Algorithmus.", correct: false }, { text: "Die Speicherkapazität eines neuronalen Netzes.", correct: false }] },
+                { question: "Eine KI, die nur für eine spezifische Aufgabe wie Schachspielen entwickelt wurde, nennt man...", answers: [{ text: "Starke KI", correct: false }, { text: "Allgemeine KI", correct: false }, { text: "Schwache oder enge KI", correct: true }, { text: "Superintelligenz", correct: false }] },
+                { question: "Was ist ein 'Neuronales Netz' im Kontext der KI?", answers: [{ text: "Ein soziales Netzwerk für Roboter.", correct: false }, { text: "Ein Computermodell, das dem menschlichen Gehirn nachempfunden ist.", correct: true }, { text: "Eine Hardware-Komponente für KI-Chips.", correct: false }, { text: "Ein Internet-Protokoll für KI-Kommunikation.", correct: false }] },
+                { question: "Der Prozess, bei dem eine KI mit gelabelten Daten trainiert wird, heißt...", answers: [{ text: "Unüberwachtes Lernen", correct: false }, { text: "Bestärkendes Lernen", correct: false }, { text: "Überwachtes Lernen", correct: true }, { text: "Transferlernen", correct: false }] },
+                { question: "Welches Unternehmen steht hinter der Entwicklung von ChatGPT?", answers: [{ text: "Google", correct: false }, { text: "Meta (Facebook)", correct: false }, { text: "Microsoft", correct: false }, { text: "OpenAI", correct: true }] },
+                { question: "Was ist eine 'KI-Ethik'?", answers: [{ text: "Ein Regelwerk, wie man KI programmiert.", correct: false }, { text: "Ein Feld, das sich mit den moralischen Implikationen und dem verantwortungsvollen Einsatz von KI befasst.", correct: true }, { text: "Die Sicherheits-Software für KI-Systeme.", correct: false }, { text: "Ein spezieller Algorithmus für faires Verhalten.", correct: false }] },
+                { question: "Was beschreibt eine 'KI-Superintelligenz'?", answers: [{ text: "Eine KI, die sehr schnell rechnen kann.", correct: false }, { text: "Eine hypothetische KI, die die menschliche Intelligenz in allen Bereichen weit übertrifft.", correct: true }, { text: "Der aktuelle Stand der ChatGPT-Technologie.", correct: false }, { text: "Eine KI, die in einem Supercomputer läuft.", correct: false }] },
+                { question: "Was ist der Hauptunterschied zwischen GPT-3.5 und GPT-4o in der kostenlosen Version?", answers: [{ text: "Es gibt keinen Unterschied.", correct: false }, { text: "GPT-4o ist schneller, hat aber weniger Wissen.", correct: false }, { text: "GPT-4o ist intelligenter, hat aber ein Nutzungslimit.", correct: true }, { text: "GPT-3.5 kann Bilder analysieren, GPT-4o nicht.", correct: false }] },
+                { question: "Welcher der 3 Faktoren eines Prompts wird durch 'Agiere als erfahrener Restrukturierungsberater' primär bedient?", answers: [{ text: "Ziel", correct: false }, { text: "Kontext", correct: true }, { text: "Anweisung", correct: false }, { text: "Format", correct: false }] },
+                { question: "Der Universalprompt macht die KI zu Eurem...", answers: [{ text: "Sekretär", correct: false }, { text: "persönlichen Prompt-Coach", correct: true }, { text: "Faktenchecker", correct: false }, { text: "Datenanalysten", correct: false }] },
+                { question: "Was ist der Zweck der Technik 'Few-Shot Prompting'?", answers: [{ text: "Der KI eine komplexe Denkaufgabe zu geben.", correct: false }, { text: "Der KI durch Beispiele das gewünschte Ausgabeformat zu zeigen.", correct: true }, { text: "Die KI zu zwingen, eine kurze Antwort zu geben.", correct: false }, { text: "Den Prompt in mehrere Teile aufzuteilen.", correct: false }] },
+                { question: "Warum ist 'menschliche Aufsicht' bei der KI-Nutzung unerlässlich?", answers: [{ text: "Weil die KI sonst zu teuer wird.", correct: false }, { text: "Weil nur der Mensch ethische und strategische Entscheidungen treffen kann.", correct: true }, { text: "Weil die KI sonst abstürzt.", correct: false }, { text: "Weil die KI nur auf Englisch antwortet.", correct: false }] }
+            ];
+            
+            const quizIntro = document.getElementById('quiz-intro');
+            const quizGame = document.getElementById('quiz-game');
+            const quizResults = document.getElementById('quiz-results');
+            if (quizIntro) {
+                const startBtn = document.getElementById('start-quiz-btn');
+                const restartQuizBtn = document.getElementById('restart-quiz');
+                let scores, currentQuestionIndex, timer, timerInterval;
+                const TIME_LIMIT = 30;
+                const teams = [ { id: 'fpm', name: 'Team FPM' }, { id: 'backoffice', name: 'Team Backoffice' }, { id: 'mna', name: 'Team M&A' }];
+                
+                function startGame() {
+                    scores = { fpm: 0, backoffice: 0, mna: 0 };
+                    currentQuestionIndex = 0;
+                    updateScoreboard();
+                    quizIntro.classList.remove('active');
+                    quizResults.classList.remove('active');
+                    quizGame.classList.add('active');
+                    displayNextQuestion();
+                }
+
+                function displayNextQuestion() {
+                    if (currentQuestionIndex >= quizQuestions.length) {
+                        endGame();
+                        return;
+                    }
+                    resetQuestionUI();
+                    const questionData = quizQuestions[currentQuestionIndex];
+                    const answeringTeam = teams[Math.floor(Math.random() * teams.length)];
+                    
+                    document.getElementById('turn-text').textContent = `${answeringTeam.name} ist an der Reihe!`;
+                    document.querySelectorAll('[id^="score-"]').forEach(el => el.classList.remove('ring-4', 'ring-amber-400'));
+                    document.getElementById(`score-${answeringTeam.id}`).classList.add('ring-4', 'ring-amber-400');
+
+                    document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+                    document.getElementById('question-text').textContent = questionData.question;
+                    
+                    const shuffledAnswers = [...questionData.answers].sort(() => Math.random() - 0.5);
+                    shuffledAnswers.forEach(answer => {
+                        const button = document.createElement('button');
+                        button.textContent = answer.text;
+                        button.className = 'quiz-answer-btn p-4 border rounded-lg bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed';
+                        button.onclick = () => selectAnswer(button, answer.correct, questionData.answers, answeringTeam.id);
+                        document.getElementById('answer-options').appendChild(button);
+                    });
+                    startTimer();
+                }
+
+                function selectAnswer(button, isCorrect, allAnswers, teamId) {
+                    clearInterval(timerInterval);
+                    document.querySelectorAll('.quiz-answer-btn').forEach(btn => btn.disabled = true);
+                    if (isCorrect) {
+                        scores[teamId] += 10;
+                        button.classList.add('correct');
+                        document.getElementById('answer-rationale').textContent = `Richtig! 10 Punkte für ${teams.find(t=>t.id===teamId).name}!`;
+                    } else {
+                        button.classList.add('incorrect');
+                        const correctAnswer = allAnswers.find(a => a.correct).text;
+                        document.getElementById('answer-rationale').textContent = `Leider falsch. Die richtige Antwort war: "${correctAnswer}"`;
+                    }
+                    updateScoreboard();
+                    document.getElementById('answer-rationale').classList.remove('hidden');
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        displayNextQuestion();
+                    }, 3000);
+                }
+
+                function startTimer() {
+                    let timeLeft = TIME_LIMIT;
+                    const timerEl = document.getElementById('quiz-timer');
+                    timerEl.textContent = timeLeft;
+                    timerEl.classList.remove('text-rose-600');
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        timerEl.textContent = timeLeft;
+                        if (timeLeft <= 5) {
+                            timerEl.classList.add('text-rose-600');
+                        }
+                        if (timeLeft <= 0) {
+                            timeUp();
+                        }
+                    }, 1000);
+                }
+
+                function timeUp() {
+                     clearInterval(timerInterval);
+                     document.querySelectorAll('.quiz-answer-btn').forEach(btn => btn.disabled = true);
+                     const correctAnswer = quizQuestions[currentQuestionIndex].answers.find(a => a.correct).text;
+                     document.getElementById('answer-rationale').textContent = `Die Zeit ist um! Die richtige Antwort war: "${correctAnswer}"`;
+                     document.getElementById('answer-rationale').classList.remove('hidden');
+                     setTimeout(() => {
+                        currentQuestionIndex++;
+                        displayNextQuestion();
+                    }, 3000);
+                }
+                
+                function resetQuestionUI() {
+                    document.getElementById('answer-options').innerHTML = '';
+                    document.getElementById('answer-rationale').classList.add('hidden');
+                    document.getElementById('turn-text').textContent = '';
+                    document.querySelectorAll('[id^="score-"]').forEach(el => el.classList.remove('ring-4', 'ring-amber-400'));
+                }
+                
+                function updateScoreboard() {
+                    teams.forEach(team => {
+                        document.querySelector(`#score-${team.id} p:first-child`).textContent = scores[team.id];
+                    });
+                }
+
+                function endGame() {
+                    quizGame.classList.remove('active');
+                    quizResults.classList.add('active');
+                    teams.forEach(team => {
+                         document.querySelector(`#final-score-${team.id} p:first-child`).textContent = scores[team.id];
+                    });
+                    const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+                    document.getElementById('winner-team').textContent = `Team ${winner.toUpperCase()}`;
+                }
+
+                startBtn.addEventListener('click', startGame);
+                restartQuizBtn.addEventListener('click', startGame);
+            }
         });
-
-        // Modal Logic
-        const modal = document.getElementById('promptModal');
-        const closeModalBtn = document.getElementById('closeModal');
-        
-        function openModal(title, prompt, analysis) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalPromptText').innerText = prompt;
-            document.getElementById('modalAnalysis').innerText = analysis;
-            modal.style.display = 'block';
-        }
-
-        closeModalBtn.onclick = () => modal.style.display = 'none';
-        window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
-
     </script>
 </body>
 </html>
