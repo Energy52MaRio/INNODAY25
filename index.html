@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -6,29 +7,58 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals (Slate & Amber) with Teal Accent -->
-    <!-- Application Structure Plan: The SPA uses a thematic tab-based navigation. A new 'Quiz-Battle' section has been added. This section is a self-contained mini-application featuring random team selection, a live scoreboard, and a timed question parcours, designed for a competitive group activity. -->
-    <!-- Visualization & Content Choices: 1. Quiz-Battle -> Goal: Engage/Assess -> Viz: Interactive Game UI -> Interaction: Click-based answers, live score updates, timer, random team selection -> Justification: Gamifies learning, encourages teamwork, and assesses knowledge retention in a dynamic way. 2. Other visualizations remain as before. NO SVG/Mermaid used. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #000; /* Dark background for space */
+            color: #f1f5f9;
+        }
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place canvas behind all content */
+        }
+        .nav-item {
+             background-color: rgba(71, 85, 105, 0.5); /* Semi-transparent buttons */
+             backdrop-filter: blur(5px);
+             border: 1px solid rgba(255, 255, 255, 0.1);
+             transition: all 0.2s ease-in-out;
+        }
+        .nav-item.locked {
+            background-color: rgba(51, 65, 85, 0.4);
+            cursor: not-allowed;
+            color: #94a3b8;
+        }
+        .nav-item:not(.locked):hover {
+            background-color: rgba(71, 85, 105, 0.8);
         }
         .nav-item.active {
             background-color: #0d9488;
             color: white;
+            border: 1px solid transparent;
         }
         .content-section, #quiz-game, #quiz-results { display: none; }
         .content-section.active, #quiz-intro.active, #quiz-game.active, #quiz-results.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         .card {
-            background-color: white;
+            background-color: rgba(15, 23, 42, 0.7); /* Semi-transparent dark cards */
+            backdrop-filter: blur(10px);
             border-radius: 0.75rem;
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .quiz-answer-btn { transition: all 0.2s ease-in-out; }
-        .quiz-answer-btn:not(:disabled):hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .quiz-answer-btn { 
+            transition: all 0.2s ease-in-out; 
+            background-color: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .quiz-answer-btn:not(:disabled):hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            background-color: rgba(51, 65, 85, 1);
+        }
         .quiz-answer-btn.correct { background-color: #10b981 !important; color: white !important; border-color: #059669 !important; }
         .quiz-answer-btn.incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
         .loader {
@@ -43,6 +73,8 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .modal {
             display: none;
+            align-items: center; /* Vertically center */
+            justify-content: center; /* Horizontally center */
             position: fixed;
             z-index: 50;
             left: 0;
@@ -50,110 +82,210 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.7);
             animation: fadeIn 0.3s;
+            backdrop-filter: blur(5px);
         }
         .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
+            background-color: #0f172a; /* Dark modal */
+            margin: auto;
             padding: 2rem;
-            border: 1px solid #888;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             width: 90%;
-            max-width: 50rem;
+            max-width: 28rem;
             border-radius: 0.75rem;
             animation: slideIn 0.3s;
         }
-        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideIn { from { transform: scale(0.9) translateY(-20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        /* Override text colors for better readability on dark background */
+        body, .text-slate-800 { color: #e2e8f0; }
+        .text-slate-900 { color: #f8fafc; }
+        .text-slate-600 { color: #94a3b8; }
+        .text-slate-500 { color: #64748b; }
+        .text-teal-700 { color: #0d9488; }
+        .text-rose-700 { color: #be123c; }
+        .text-sky-700 { color: #0369a1; }
+        .text-purple-700 { color: #7e22ce; }
+        .text-amber-800 { color: #f59e0b; }
+        .text-indigo-800 { color: #4338ca; }
+        .text-indigo-700 { color: #4f46e5; }
+        .text-blue-700 { color: #1d4ed8; }
+        .text-orange-700 { color: #c2410c; }
+        .text-green-700 { color: #15803d; }
+        .text-cyan-700 { color: #0e7490; }
+
+        .bg-white, .bg-white\/50, .bg-white\/60 {
+            background-color: rgba(15, 23, 42, 0.6); /* Override white backgrounds */
+            backdrop-filter: blur(10px);
+        }
+        .border-slate-200 { border-color: rgba(255, 255, 255, 0.1); }
+        .bg-slate-50 { background-color: rgba(30, 41, 59, 0.5); }
+        .bg-rose-50 { background-color: rgba(159, 18, 57, 0.2); }
+        .border-rose-200 { border-color: rgba(251, 113, 133, 0.3); }
+        .bg-teal-50 { background-color: rgba(13, 148, 136, 0.2); }
+        .border-teal-200 { border-color: rgba(45, 212, 191, 0.3); }
+        .bg-amber-50 { background-color: rgba(217, 119, 6, 0.15); }
+        .border-amber-200 { border-color: rgba(251, 191, 36, 0.3); }
+        .bg-slate-800 { background-color: rgba(30, 41, 59, 0.9); }
+        .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15); }
+        .border-indigo-200 { border-color: rgba(165, 180, 252, 0.3); }
+        .bg-sky-50 { background-color: rgba(56, 189, 248, 0.15); }
+        .border-sky-200 { border-color: rgba(125, 211, 252, 0.3); }
+        .bg-purple-50 { background-color: rgba(168, 85, 247, 0.15); }
+        .border-purple-200 { border-color: rgba(209, 196, 253, 0.3); }
+        #toast-notification {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .lock-icon {
+            opacity: 0.6;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .nav-item:not(.locked) .lock-icon {
+            display: none;
+        }
+        .nav-item.locked .nav-text {
+            opacity: 0.6;
+        }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body class="antialiased">
 
-    <div class="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container mx-auto px-4 py-8 md:py-12 max-w-7xl relative z-10">
         
-        <div class="mb-8 p-4 bg-white/60 border border-slate-200 rounded-xl text-center shadow-sm">
-            <h2 class="text-3xl font-bold text-slate-800 tracking-widest">
-                M<span class="text-teal-600">A</span>R<span class="text-teal-600">I</span>O
+        <div class="mb-8 p-4 bg-slate-900/60 border border-slate-200/20 rounded-xl text-center shadow-sm backdrop-blur-sm">
+            <h2 class="text-3xl font-bold text-slate-100 tracking-widest">
+                M<span class="text-teal-400">A</span>R<span class="text-teal-400">I</span>O
             </h2>
-            <p class="text-slate-600 text-sm mt-1">AI for a better world</p>
+            <p class="text-slate-400 text-sm mt-1">AI for a better world</p>
             <div class="mt-3 text-xs text-slate-500">
                 <span>Euer AI Freak für alle Fälle :)</span>
                 <span class="mx-2">|</span>
-                <a href="#" class="hover:text-teal-600">@MS Teams</a>
+                <a href="#" class="hover:text-teal-400">@MS Teams</a>
             </div>
         </div>
 
         <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">Prompting Masterclass Course</h1>
-            <p class="text-lg text-slate-600 mt-2">am Innovationday 4.7.2025 - ein interaktiver Hub für die WALTERFRIES Gruppe</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-100 tracking-tight">Prompting Masterclass Course</h1>
+            <p class="text-lg text-slate-400 mt-2">am Innovationday 4.7.2025 - ein interaktiver Hub für die WALTERFRIES Gruppe</p>
         </header>
         
-        <div class="bg-white/50 border border-slate-200 rounded-2xl shadow-lg p-4 md:p-8">
+        <div id="entry-screen" class="text-center">
+             <div class="card max-w-lg mx-auto p-8">
+                <div id="countdown-wrapper">
+                    <div id="countdown-container" class="mb-6">
+                        <h4 class="text-lg font-semibold text-amber-400 mb-4">Der Countdown läuft!</h4>
+                        <div class="flex justify-center gap-4 sm:gap-6 text-center">
+                            <div>
+                                <div id="days" class="text-3xl sm:text-4xl font-bold">00</div>
+                                <div class="text-xs text-slate-400">Tage</div>
+                            </div>
+                            <div>
+                                <div id="hours" class="text-3xl sm:text-4xl font-bold">00</div>
+                                <div class="text-xs text-slate-400">Stunden</div>
+                            </div>
+                            <div>
+                                <div id="minutes" class="text-3xl sm:text-4xl font-bold">00</div>
+                                <div class="text-xs text-slate-400">Minuten</div>
+                            </div>
+                            <div>
+                                <div id="seconds" class="text-3xl sm:text-4xl font-bold">00</div>
+                                <div class="text-xs text-slate-400">Sekunden</div>
+                            </div>
+                        </div>
+                        <p id="countdown-message" class="text-slate-400 text-xs mt-4">Noch schnell einen Kaffee holen, der Einlass zur digitalen Galaxie beginnt bald...</p>
+                    </div>
+                </div>
+
+                 <hr class="border-slate-700 my-6">
+
+                 <h3 class="text-xl font-bold mb-4">Willkommen!</h3>
+                 <p id="password-prompt-text" class="text-slate-400 mb-6">Bitte gib das Passwort für den ersten Kursabschnitt "Grundlagen" ein, um zu starten.</p>
+                 <form id="initial-password-form">
+                     <input type="password" id="initial-password-input" class="block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" placeholder="Passwort">
+                     <p id="initial-error-msg" class="text-rose-400 text-sm mt-2 h-5"></p>
+                     <button type="submit" id="start-course-btn" class="mt-4 w-full flex justify-center items-center gap-2 bg-teal-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-teal-700">Kurs starten</button>
+                 </form>
+                 <div class="mt-6 text-center">
+                    <button id="instructor-login-btn" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">Kursleiter-Login</button>
+                </div>
+             </div>
+        </div>
+
+        <div id="main-content" class="hidden bg-slate-900/50 border border-slate-200/20 rounded-2xl shadow-lg p-4 md:p-8 backdrop-blur-md">
             <nav class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
-                <button class="nav-item active flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="grundlagen"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Grundlagen</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="architektur"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Prompt-Architektur</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="advanced"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>Fortgeschrittene Techniken</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="teams"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team-Szenarien</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="workflows"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10c0-4.42-2.87-8.17-6.84-9.5c-.5-.1-.96-.6-.96-1.12V1.25a1.25 1.25 0 0 0-2.5 0v.13c0 .52-.46 1.02-.96 1.12C4.87 3.83 2 7.58 2 12a10 10 0 0 0 10 10z"/><path d="m16 8-4 4-4-4"/><path d="m12 16 4-4"/></svg>Workflows</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="tools"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tools & Plattformen</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="zukunft"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Zukunft & Ausblick</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="glossar"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Glossar</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="sicherheit"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><shield class="lucide lucide-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></shield></svg>Sicherheit & Ethik</button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full bg-amber-500 hover:bg-amber-600 text-white" data-target="quiz"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M9.5 14.66A2.5 2.5 0 0 1 12 12a2.5 2.5 0 0 1 2.5 2.66"/></svg>Quiz-Battle</button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="grundlagen"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Grundlagen</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="architektur"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Prompt-Architektur</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="advanced"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Fortgeschrittene Techniken</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="teams"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Team-Szenarien</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="workflows"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Workflows</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="tools"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Tools & Plattformen</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="zukunft"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Zukunft & Ausblick</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="glossar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Glossar</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="sicherheit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Sicherheit & Ethik</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="quiz"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Quiz-Battle</span></button>
             </nav>
 
             <main>
-                <!-- SECTION: Grundlagen -->
+                 <!-- All content sections from the original file go here -->
                 <section id="grundlagen" class="content-section active">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Die Basis für Euren Erfolg</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Um ChatGPT meisterhaft zu nutzen, müssen wir verstehen, was es ist, was es nicht ist und welche grundlegenden Prinzipien seine Ergebnisse bestimmen. Dieser Bereich legt das Fundament für Euren Erfolg.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Um ChatGPT meisterhaft zu nutzen, müssen wir verstehen, was es ist, was es nicht ist und welche grundlegenden Prinzipien seine Ergebnisse bestimmen. Dieser Bereich legt das Fundament für Euren Erfolg.</p>
                     </div>
                     <div class="grid md:grid-cols-2 gap-8 mb-12">
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>Was IST ChatGPT?</h3>
+                            <h3 class="text-xl font-bold mb-2 text-teal-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>Was IST ChatGPT?</h3>
                             <p>Im Kern ist es ein **Großes Sprachmodell (LLM)**. Es wurde mit gigantischen Textmengen trainiert, um Muster zu erkennen. Es rät, basierend auf Wahrscheinlichkeiten, welches Wort als Nächstes am sinnvollsten ist. Stellt es Euch als extrem fortgeschrittene Autovervollständigung vor.</p>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-rose-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>Was ChatGPT NICHT ist!</h3>
+                            <h3 class="text-xl font-bold mb-2 text-rose-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>Was ChatGPT NICHT ist!</h3>
                             <p>Es hat **kein Bewusstsein**, kein Urteilsvermögen und keine Meinung. Es versteht den Inhalt nicht wirklich. Es kennt keine Ereignisse nach seinem letzten Training (**Wissensstopp**) und kann Voreingenommenheiten aus den Trainingsdaten (**Bias**) wiedergeben. Es ist ein Werkzeug, kein Kollege.</p>
                         </div>
                         <div class="card p-6 md:col-span-2">
-                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3v7h6"/><path d="M12 3v18l7-7-7-7z"/></svg>GIGO in Aktion: Vage vs. Präzise Anweisungen</h3>
+                            <h3 class="text-xl font-bold mb-2 text-teal-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3v7h6"/><path d="M12 3v18l7-7-7-7z"/></svg>GIGO in Aktion: Vage vs. Präzise Anweisungen</h3>
                             <p class="text-sm">Die "Garbage In, Garbage Out"-Regel ist das wichtigste Prinzip. Hier seht Ihr, was das im Alltag bedeutet:</p>
                              <div class="mt-4 grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <h4 class="font-semibold text-rose-600">Schlechter Prompt</h4>
-                                    <blockquote class="mt-2 p-3 bg-rose-50 border-l-4 border-rose-200 text-sm">"Schreib eine E-Mail an einen Kunden."</blockquote>
+                                    <h4 class="font-semibold text-rose-500">Schlechter Prompt</h4>
+                                    <blockquote class="mt-2 p-3 bg-rose-900/50 border-l-4 border-rose-500/50 text-sm">"Schreib eine E-Mail an einen Kunden."</blockquote>
                                     <p class="text-xs text-slate-500 mt-1">**Problem:** Die KI weiß nichts über den Kunden, das Ziel der E-Mail oder den gewünschten Ton. Das Ergebnis ist generisch und unbrauchbar.</p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-teal-600">Guter Prompt</h4>
-                                     <blockquote class="mt-2 p-3 bg-teal-50 border-l-4 border-teal-200 text-sm">"Agiere als Key-Account-Manager der WALTERFRIES Gruppe. Formuliere eine E-Mail an einen langjährigen, fiktiven Kunden (Herr Schmidt, Firma TechSolutions). Informiere ihn höflich, dass sich die Fertigstellung von Projekt 'Alpha' um zwei Wochen verzögert. Schlage als Kompensation einen kostenlosen Zusatz-Workshop vor. Der Ton soll partnerschaftlich und lösungsorientiert sein."</blockquote>
+                                    <h4 class="font-semibold text-teal-500">Guter Prompt</h4>
+                                     <blockquote class="mt-2 p-3 bg-teal-900/50 border-l-4 border-teal-500/50 text-sm">"Agiere als Key-Account-Manager der WALTERFRIES Gruppe. Formuliere eine E-Mail an einen langjährigen, fiktiven Kunden (Herr Schmidt, Firma TechSolutions). Informiere ihn höflich, dass sich die Fertigstellung von Projekt 'Alpha' um zwei Wochen verzögert. Schlage als Kompensation einen kostenlosen Zusatz-Workshop vor. Der Ton soll partnerschaftlich und lösungsorientiert sein."</blockquote>
                                      <p class="text-xs text-slate-500 mt-1">**Ergebnis:** Durch Rolle, Ziel, Kontext, Inhalt und Tonfall kann die KI einen hochrelevanten Entwurf erstellen.</p>
                                 </div>
                             </div>
                         </div>
                          <div class="card p-6 md:col-span-2">
-                             <h3 class="text-xl font-bold mb-2 text-rose-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Vorsicht, Falle: Wie "Bias" Eure Ergebnisse beeinflusst</h3>
+                             <h3 class="text-xl font-bold mb-2 text-rose-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Vorsicht, Falle: Wie "Bias" Eure Ergebnisse beeinflusst</h3>
                             <p class="text-sm">Da die KI mit Texten aus dem Internet trainiert wurde, spiegelt sie die dort vorhandenen Vorurteile (Bias) wider. Ihr müsst aktiv gegensteuern, um ausgewogene Ergebnisse zu erhalten.</p>
                              <div class="mt-4 grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <h4 class="font-semibold text-rose-600">Suboptimaler Prompt</h4>
-                                    <blockquote class="mt-2 p-3 bg-rose-50 border-l-4 border-rose-200 text-sm">"Erstelle mir das Profil eines typischen erfolgreichen Gründers."</blockquote>
+                                    <h4 class="font-semibold text-rose-500">Suboptimaler Prompt</h4>
+                                    <blockquote class="mt-2 p-3 bg-rose-900/50 border-l-4 border-rose-500/50 text-sm">"Erstelle mir das Profil eines typischen erfolgreichen Gründers."</blockquote>
                                     <p class="text-xs text-slate-500 mt-1">**Mögliches Ergebnis:** Beschreibt wahrscheinlich einen jungen, männlichen Tech-Gründer aus einer Metropole, weil dieses Stereotyp in den Trainingsdaten überrepräsentiert ist.</p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-teal-600">Besserer Prompt</h4>
-                                     <blockquote class="mt-2 p-3 bg-teal-50 border-l-4 border-teal-200 text-sm">"Erstelle mir drei Profile von erfolgreichen Gründern aus unterschiedlichen Branchen (z.B. Handwerk, Soziales, Technologie), mit unterschiedlichem Alter und Geschlecht."</blockquote>
+                                    <h4 class="font-semibold text-teal-500">Besserer Prompt</h4>
+                                     <blockquote class="mt-2 p-3 bg-teal-900/50 border-l-4 border-teal-500/50 text-sm">"Erstelle mir drei Profile von erfolgreichen Gründern aus unterschiedlichen Branchen (z.B. Handwerk, Soziales, Technologie), mit unterschiedlichem Alter und Geschlecht."</blockquote>
                                      <p class="text-xs text-slate-500 mt-1">**Ergebnis:** Liefert vielfältigere und realistischere Profile, die Vorurteile aktiv vermeiden.</p>
                                 </div>
                             </div>
                         </div>
 
                          <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-sky-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><message-circle class="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 12.1"/></message-circle></svg>Ein Gespräch, kein Befehlsempfänger</h3>
+                            <h3 class="text-xl font-bold mb-2 text-sky-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 12.1"/></svg>Ein Gespräch, kein Befehlsempfänger</h3>
                             <p>Behandelt die KI wie einen sehr vergesslichen, aber extrem schnellen Praktikanten. Sie merkt sich nur, was im aktuellen Chat steht (ihr "Kurzzeitgedächtnis").</p>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm space-y-2">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm space-y-2">
                                 <p><strong>Ihr:</strong> "Liste IT-Unternehmen in Bayern."</p>
                                 <p><strong>KI:</strong> "1. Firma A, 2. Firma B, 3. Firma C..."</p>
                                 <p><strong>Ihr:</strong> "Welche davon sind auf Cloud spezialisiert?"</p>
@@ -163,87 +295,87 @@
                         </div>
 
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-purple-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10Z"/><path d="m9 12 2 2 4-4"/></svg>Generator vs. Orakel</h3>
+                            <h3 class="text-xl font-bold mb-2 text-purple-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10Z"/><path d="m9 12 2 2 4-4"/></svg>Generator vs. Orakel</h3>
                             <p>Die KI ist eine **Mustermaschine**, keine Wissensdatenbank. Sie "weiß" nichts, sondern generiert Antworten basierend auf den Mustern in ihren Trainingsdaten.</p>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm">
                                 <p>Stellt es Euch wie ein Mosaik vor. Die KI hat Milliarden von Steinchen (Wörtern) und weiß, welche Muster schön aussehen.</p>
                                 <p class="mt-2">Fragt Ihr nach dem "Eiffelturm", findet sie die "Paris"-Steinchen. Fragt Ihr nach etwas, wozu sie keine klaren Muster hat, setzt sie trotzdem Steinchen zusammen, die plausibel klingen – aber vielleicht frei erfunden sind. **Das ist der Grund für Halluzinationen!**</p>
                             </blockquote>
                         </div>
                     </div>
-                    <div class="card p-8 bg-amber-50 border border-amber-200 mb-8">
-                        <h3 class="text-2xl font-bold text-center mb-4 text-amber-800 flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>KI Fun Facts</h3>
+                    <div class="card p-8 bg-amber-900/50 border border-amber-500/50 mb-8">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-amber-300 flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>KI Fun Facts</h3>
                          <div class="grid md:grid-cols-3 gap-6 mt-6 text-center">
                             <div>
-                                <h4 class="font-bold text-lg">Unvorstellbare Datenmenge</h4>
-                                <p class="text-sm text-slate-600 mt-2">Das Modell GPT-3 wurde mit Texten trainiert, die ca. 400 Milliarden Wörter umfassen. Ein Mensch müsste über 200.000 Jahre ununterbrochen lesen, um das zu schaffen.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Unvorstellbare Datenmenge</h4>
+                                <p class="text-sm text-slate-400 mt-2">Das Modell GPT-3 wurde mit Texten trainiert, die ca. 400 Milliarden Wörter umfassen. Ein Mensch müsste über 200.000 Jahre ununterbrochen lesen, um das zu schaffen.</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-lg">Nicht-menschliche Logik</h4>
-                                <p class="text-sm text-slate-600 mt-2">In einem berühmten Experiment opferte eine Schach-KI ihre Dame. Menschen waren verwirrt. Die KI hatte aber einen Sieg in 20 Zügen vorausberechnet – undenkbar für Menschen.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Nicht-menschliche Logik</h4>
+                                <p class="text-sm text-slate-400 mt-2">In einem berühmten Experiment opferte eine Schach-KI ihre Dame. Menschen waren verwirrt. Die KI hatte aber einen Sieg in 20 Zügen vorausberechnet – undenkbar für Menschen.</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-lg">Enormer Energiebedarf</h4>
-                                <p class="text-sm text-slate-600 mt-2">Das Training eines großen Sprachmodells kann so viel Energie verbrauchen wie eine Kleinstadt in einem Monat. Effizienz ist eine der größten Herausforderungen in der KI.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Enormer Energiebedarf</h4>
+                                <p class="text-sm text-slate-400 mt-2">Das Training eines großen Sprachmodells kann so viel Energie verbrauchen wie eine Kleinstadt in einem Monat. Effizienz ist eine der größten Herausforderungen in der KI.</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-lg">AI als Komponist</h4>
-                                <p class="text-sm text-slate-600 mt-2">Eine KI namens AIVA ist als Komponistin bei einer Rechtegesellschaft registriert. Ihre Werke wurden bereits von Orchestern aufgeführt.</p>
+                                <h4 class="font-bold text-lg text-amber-200">AI als Komponist</h4>
+                                <p class="text-sm text-slate-400 mt-2">Eine KI namens AIVA ist als Komponistin bei einer Rechtegesellschaft registriert. Ihre Werke wurden bereits von Orchestern aufgeführt.</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-lg">Der erste Chatbot: ELIZA</h4>
-                                <p class="text-sm text-slate-600 mt-2">Schon 1966 simulierte das Programm ELIZA eine Psychotherapeutin so überzeugend, dass viele Nutzer eine emotionale Bindung aufbauten.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Der erste Chatbot: ELIZA</h4>
+                                <p class="text-sm text-slate-400 mt-2">Schon 1966 simulierte das Programm ELIZA eine Psychotherapeutin so überzeugend, dass viele Nutzer eine emotionale Bindung aufbauten.</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-lg">Proteinfaltung gelöst</h4>
-                                <p class="text-sm text-slate-600 mt-2">DeepMinds AlphaFold löste das Rätsel der Proteinfaltung, was die medizinische Forschung und Medikamentenentwicklung dramatisch beschleunigt.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Proteinfaltung gelöst</h4>
+                                <p class="text-sm text-slate-400 mt-2">DeepMinds AlphaFold löste das Rätsel der Proteinfaltung, was die medizinische Forschung und Medikamentenentwicklung dramatisch beschleunigt.</p>
                             </div>
                              <div>
-                                <h4 class="font-bold text-lg">KI-Kunst für $432.500</h4>
-                                <p class="text-sm text-slate-600 mt-2">Ein KI-generiertes Porträt wurde 2018 bei Christie's für fast eine halbe Million Dollar versteigert, obwohl es auf nur 10.000$ geschätzt wurde.</p>
+                                <h4 class="font-bold text-lg text-amber-200">KI-Kunst für $432.500</h4>
+                                <p class="text-sm text-slate-400 mt-2">Ein KI-generiertes Porträt wurde 2018 bei Christie's für fast eine halbe Million Dollar versteigert, obwohl es auf nur 10.000$ geschätzt wurde.</p>
                             </div>
                              <div>
-                                <h4 class="font-bold text-lg">Spiele-Meisterschaft 2.0</h4>
-                                <p class="text-sm text-slate-600 mt-2">KI schlägt Menschen nicht nur in Schach & Go, sondern auch in komplexeren Spielen mit unvollständigen Infos wie Poker (Pluribus) und StarCraft II (AlphaStar).</p>
+                                <h4 class="font-bold text-lg text-amber-200">Spiele-Meisterschaft 2.0</h4>
+                                <p class="text-sm text-slate-400 mt-2">KI schlägt Menschen nicht nur in Schach & Go, sondern auch in komplexeren Spielen mit unvollständigen Infos wie Poker (Pluribus) und StarCraft II (AlphaStar).</p>
                             </div>
                              <div>
-                                <h4 class="font-bold text-lg">Geburtsstunde der KI</h4>
-                                <p class="text-sm text-slate-600 mt-2">Der Begriff "Künstliche Intelligenz" wurde bereits 1956 von John McCarthy auf der legendären Dartmouth Conference geprägt.</p>
+                                <h4 class="font-bold text-lg text-amber-200">Geburtsstunde der KI</h4>
+                                <p class="text-sm text-slate-400 mt-2">Der Begriff "Künstliche Intelligenz" wurde bereits 1956 von John McCarthy auf der legendären Dartmouth Conference geprägt.</p>
                             </div>
                         </div>
                     </div>
-                     <div class="card p-8 bg-slate-800 text-white">
+                     <div class="card p-8 bg-slate-900 text-white">
                         <h3 class="text-2xl font-bold text-center mb-4 text-white flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 4.3-4.3c.9-.9 2.1-1.4 3.3-1.4h4a2 2 0 1 0 0-4h-4.3c-1.2 0-2.4-.5-3.3-1.4L7 3"/></svg>Historische 'Fails': Berühmte Fehleinschätzungen</h3>
                          <div class="grid md:grid-cols-4 gap-8 mt-6 text-center">
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                 <p class="text-sm text-slate-300 italic">"Das 'Telefon' hat zu viele Mängel, um ernsthaft als Kommunikationsmittel in Betracht gezogen zu werden."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Western Union, interne Memo, 1876</p>
                             </div>
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                 <p class="text-sm text-slate-300 italic">"Das Pferd wird es immer geben, aber das Automobil ist nur eine Neuheit – eine Modeerscheinung."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Präsident der Michigan Savings Bank, 1903</p>
                             </div>
-                            <div class="border-t-2 border-slate-600 pt-4">
+                            <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"Es gibt keinen Grund, warum irgendjemand einen Computer in seinem Haus haben wollte."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Ken Olsen, Gründer Digital Equipment Corp., 1977</p>
                             </div>
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"...keine Online-Datenbank wird Ihre Tageszeitung ersetzen."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Clifford Stoll, Newsweek, 1995</p>
                             </div>
-                            <div class="border-t-2 border-slate-600 pt-4">
+                            <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"Ich glaube, es gibt einen Weltmarkt für vielleicht fünf Computer."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Thomas Watson, Vorsitzender von IBM, 1943</p>
                             </div>
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"Wir mögen ihren Sound nicht. Gitarrengruppen sind auf dem Weg nach draußen."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Decca Records bei der Ablehnung der Beatles, 1962</p>
                             </div>
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"Das Fernsehen wird sich nach sechs Monaten nicht halten. Die Leute werden es leid sein, auf eine Kiste zu starren."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Darryl Zanuck, Chef von 20th Century Fox, 1946</p>
                             </div>
-                             <div class="border-t-2 border-slate-600 pt-4">
+                             <div class="border-t-2 border-slate-700 pt-4">
                                <p class="text-sm text-slate-300 italic">"Keine Chance, dass das iPhone einen nennenswerten Marktanteil gewinnen wird."</p>
                                 <p class="text-xs font-semibold text-slate-400 mt-2">Steve Ballmer, CEO von Microsoft, 2007</p>
                             </div>
@@ -254,45 +386,45 @@
                 <section id="architektur" class="content-section">
                      <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Die Architektur eines perfekten Prompts</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Hier lernt Ihr die Bausteine und Techniken kennen, um Anweisungen zu formulieren, die zu exzellenten Ergebnissen führen. Vom grundlegenden Aufbau bis zum "Universalprompt", der die KI für Euch arbeiten lässt.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Hier lernt Ihr die Bausteine und Techniken kennen, um Anweisungen zu formulieren, die zu exzellenten Ergebnissen führen. Vom grundlegenden Aufbau bis zum "Universalprompt", der die KI für Euch arbeiten lässt.</p>
                     </div>
                     <div class="card p-8 mb-12">
                         <h3 class="text-2xl font-bold text-center mb-6">Die 3 Faktoren eines Top-Prompts</h3>
                         <div class="grid md:grid-cols-3 gap-8 text-center">
-                           <div class="card p-4">
-                               <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">1</div>
+                           <div class="card p-4 bg-slate-800/80">
+                               <div class="bg-teal-500 text-slate-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">1</div>
                                <h4 class="font-bold text-lg mb-2">Kontext</h4>
-                               <p class="text-sm text-slate-600 mb-4">Gebt der KI eine Rolle ("Agiere als..."). Das schärft ihre Perspektive und den Fokus.</p>
-                               <blockquote class="text-left text-xs bg-rose-50 border-l-4 border-rose-200 p-2 mb-2"><strong>Schlecht:</strong> "Schreibe über M&A."</blockquote>
-                               <blockquote class="text-left text-xs bg-teal-50 border-l-4 border-teal-200 p-2"><strong>Gut:</strong> "Agiere als M&A-Berater, der eine Präsentation für einen konservativen, mittelständischen Mandanten vorbereitet."</blockquote>
+                               <p class="text-sm text-slate-400 mb-4">Gebt der KI eine Rolle ("Agiere als..."). Das schärft ihre Perspektive und den Fokus.</p>
+                               <blockquote class="text-left text-xs bg-rose-900/50 border-l-4 border-rose-500/50 p-2 mb-2"><strong>Schlecht:</strong> "Schreibe über M&A."</blockquote>
+                               <blockquote class="text-left text-xs bg-teal-900/50 border-l-4 border-teal-500/50 p-2"><strong>Gut:</strong> "Agiere als M&A-Berater, der eine Präsentation für einen konservativen, mittelständischen Mandanten vorbereitet."</blockquote>
                            </div>
-                           <div class="card p-4">
-                               <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">2</div>
+                           <div class="card p-4 bg-slate-800/80">
+                               <div class="bg-teal-500 text-slate-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">2</div>
                                <h4 class="font-bold text-lg mb-2">Anweisung</h4>
-                               <p class="text-sm text-slate-600 mb-4">Seid ultra-spezifisch: Was soll die Aufgabe sein? Welches Format? Welche Länge?</p>
-                               <blockquote class="text-left text-xs bg-rose-50 border-l-4 border-rose-200 p-2 mb-2"><strong>Schlecht:</strong> "Fass den Text zusammen."</blockquote>
-                               <blockquote class="text-left text-xs bg-teal-50 border-l-4 border-teal-200 p-2"><strong>Gut:</strong> "Fasse den folgenden Text in exakt fünf prägnanten Stichpunkten zusammen. Formatiere die Ausgabe als Markdown-Liste."</blockquote>
+                               <p class="text-sm text-slate-400 mb-4">Seid ultra-spezifisch: Was soll die Aufgabe sein? Welches Format? Welche Länge?</p>
+                               <blockquote class="text-left text-xs bg-rose-900/50 border-l-4 border-rose-500/50 p-2 mb-2"><strong>Schlecht:</strong> "Fass den Text zusammen."</blockquote>
+                               <blockquote class="text-left text-xs bg-teal-900/50 border-l-4 border-teal-500/50 p-2"><strong>Gut:</strong> "Fasse den folgenden Text in exakt fünf prägnanten Stichpunkten zusammen. Formatiere die Ausgabe als Markdown-Liste."</blockquote>
                            </div>
-                           <div class="card p-4">
-                               <div class="bg-teal-100 text-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">3</div>
+                           <div class="card p-4 bg-slate-800/80">
+                               <div class="bg-teal-500 text-slate-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">3</div>
                                <h4 class="font-bold text-lg mb-2">Ziel</h4>
-                               <p class="text-sm text-slate-600 mb-4">Definiert die Zielgruppe. Das bestimmt den Stil, die Tonalität und die Komplexität der Antwort.</p>
-                               <blockquote class="text-left text-xs bg-rose-50 border-l-4 border-rose-200 p-2 mb-2"><strong>Schlecht:</strong> "Erkläre die Bilanz."</blockquote>
-                               <blockquote class="text-left text-xs bg-teal-50 border-l-4 border-teal-200 p-2"><strong>Gut:</strong> "Erkläre die Bilanz so einfach wie möglich für einen Auszubildenden im ersten Lehrjahr, der keine Vorkenntnisse hat."</blockquote>
+                               <p class="text-sm text-slate-400 mb-4">Definiert die Zielgruppe. Das bestimmt den Stil, die Tonalität und die Komplexität der Antwort.</p>
+                               <blockquote class="text-left text-xs bg-rose-900/50 border-l-4 border-rose-500/50 p-2 mb-2"><strong>Schlecht:</strong> "Erkläre die Bilanz."</blockquote>
+                               <blockquote class="text-left text-xs bg-teal-900/50 border-l-4 border-teal-500/50 p-2"><strong>Gut:</strong> "Erkläre die Bilanz so einfach wie möglich für einen Auszubildenden im ersten Lehrjahr, der keine Vorkenntnisse hat."</blockquote>
                            </div>
                         </div>
                     </div>
-                    <div class="card p-8 mb-12 bg-amber-50 border border-amber-200">
-                        <h3 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2">✨ Game Changer: Der interaktive Universalprompt-Coach</h3>
-                        <p class="text-center text-slate-600 mb-6">Lasst die KI für Euch arbeiten! Beschreibt Euer Ziel, und der KI-Coach entwickelt den perfekten Prompt für Euch.</p>
+                    <div class="card p-8 mb-12 bg-amber-900/50 border border-amber-500/50">
+                        <h3 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2 text-amber-300">✨ Game Changer: Der interaktive Universalprompt-Coach</h3>
+                        <p class="text-center text-slate-400 mb-6">Lasst die KI für Euch arbeiten! Beschreibt Euer Ziel, und der KI-Coach entwickelt den perfekten Prompt für Euch.</p>
                         <div class="space-y-4">
                             <div>
-                                <label for="userGoal" class="block text-sm font-medium text-slate-700">1. Was möchtet Ihr erreichen?</label>
-                                <input type="text" id="userGoal" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. eine Marketing-E-Mail für ein neues Produkt schreiben">
+                                <label for="userGoal" class="block text-sm font-medium text-slate-300">1. Was möchtet Ihr erreichen?</label>
+                                <input type="text" id="userGoal" class="mt-1 block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. eine Marketing-E-Mail für ein neues Produkt schreiben">
                             </div>
                             <div>
-                                <label for="userContext" class="block text-sm font-medium text-slate-700">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
-                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTERFRIES">
+                                <label for="userContext" class="block text-sm font-medium text-slate-300">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
+                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTERFRIES">
                             </div>
                             <button id="generateUniversalPrompt" class="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 ✨ Prompt vom KI-Coach entwickeln lassen
@@ -306,7 +438,7 @@
                         </div>
                          <div id="universalPromptLoader" class="hidden mt-6 flex justify-center items-center">
                             <div class="loader"></div>
-                            <p class="ml-4 text-slate-600">KI-Coach entwickelt den Prompt...</p>
+                            <p class="ml-4 text-slate-400">KI-Coach entwickelt den Prompt...</p>
                         </div>
                     </div>
                 </section>
@@ -314,47 +446,47 @@
                 <section id="advanced" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Fortgeschrittene Prompt-Techniken</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Meistert diese Techniken, um die KI zu Höchstleistungen anzuspornen und Eure Analyse-Workflows zu automatisieren.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Meistert diese Techniken, um die KI zu Höchstleistungen anzuspornen und Eure Analyse-Workflows zu automatisieren.</p>
                     </div>
                     <div class="grid md:grid-cols-1 lg:grid-cols-1 gap-8">
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-teal-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>Chain-of-Thought (CoT)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-teal-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>Chain-of-Thought (CoT)</h3>
                             <p class="text-sm mb-4">Weist die KI an, ihre "Gedankenkette" offenzulegen, indem Ihr am Ende eines Prompts hinzufügt: `"Denk Schritt für Schritt nach."`. Das verbessert die logische Herleitung bei komplexen Problemen und macht die Ergebnisse nachvollziehbarer.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Ein Unternehmen hat 100 T-Shirts. 40% sind blau, der Rest ist rot. Es verkauft 25% der blauen und 50% der roten. Wie viele sind übrig?"</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Ein Unternehmen hat 100 T-Shirts. 40% sind blau, der Rest ist rot. Es verkauft 25% der blauen und 50% der roten. Wie viele sind übrig?"</p>
                                     <p class="text-xs text-slate-500">Die KI könnte einen Rechenfehler machen, ohne dass Ihr es merkt.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "...Wie viele sind übrig? **Denk Schritt für Schritt nach.**"</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "...Wie viele sind übrig? **Denk Schritt für Schritt nach.**"</p>
                                     <p class="text-xs text-slate-500">Die KI zeigt ihre Rechenschritte, was Fehlererkennung und Vertrauen erhöht.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                             <h3 class="text-xl font-bold mb-2 text-sky-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Few-Shot Prompting</h3>
+                             <h3 class="text-xl font-bold mb-2 text-sky-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Few-Shot Prompting</h3>
                             <p class="text-sm mb-4">Zeigt der KI genau, was Ihr wollt, indem Ihr 2-3 Beispiele direkt in den Prompt schreibt. Die KI lernt das Muster und wendet es an.</p>
-                             <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                             <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Kategorisiere diesen Auszug aus einer Bilanz: 'Vorräte 50.000€'."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Kategorisiere diesen Auszug aus einer Bilanz: 'Vorräte 50.000€'."</p>
                                     <p class="text-xs text-slate-500">Unklar, welches Kategoriesystem verwendet werden soll.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Kategorisiere die folgenden Bilanzpositionen als 'Umlaufvermögen' oder 'Anlagevermögen'.<br>Beispiele:<br>Forderungen -> Umlaufvermögen<br>Maschinen -> Anlagevermögen<br>--<br>Aufgabe: Vorräte -> ?"</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Kategorisiere die folgenden Bilanzpositionen als 'Umlaufvermögen' oder 'Anlagevermögen'.<br>Beispiele:<br>Forderungen -> Umlaufvermögen<br>Maschinen -> Anlagevermögen<br>--<br>Aufgabe: Vorräte -> ?"</p>
                                     <p class="text-xs text-slate-500">Bringt der KI das gewünschte Schema bei, was zu einer korrekten und konsistenten Antwort führt.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-purple-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4 4-4-4"/><path d="m12 16 4-4"/></svg>Selbst-Korrektur (Self-Correction)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-purple-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4 4-4-4"/><path d="m12 16 4-4"/></svg>Selbst-Korrektur (Self-Correction)</h3>
                             <p class="text-sm mb-4">Lasst die KI ihre eigene Arbeit kritisieren und verbessern. Das führt oft zu deutlich nuancierteren und besseren Ergebnissen.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Standard-Vorgehen:</strong> Die erste generierte Antwort direkt verwenden.</p>
+                                    <p><strong class="text-rose-400">Standard-Vorgehen:</strong> Die erste generierte Antwort direkt verwenden.</p>
                                     <p class="text-xs text-slate-500">Die erste Antwort ist oft gut, aber selten perfekt. Sie kann zu allgemein oder im Ton unpassend sein.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Besser:</strong>
+                                    <p><strong class="text-teal-400">Besser:</strong>
                                     <ol class="list-decimal list-inside text-xs">
                                         <li>"Schreibe einen E-Mail-Entwurf, um einen Kunden über eine Preiserhöhung zu informieren."</li>
                                         <li>**Folge-Prompt:** "Analysiere den obigen Entwurf. Ist der Ton zu direkt? Klingt er wertschätzend genug? Überarbeite den Entwurf, sodass er partnerschaftlicher und weniger konfrontativ wirkt."</li>
@@ -365,99 +497,99 @@
                             </blockquote>
                         </div>
                          <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-rose-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v2"/><path d="M21 14v2a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16v-2"/><path d="m21 10-7-4-7 4"/><path d="m3 10 7 4 7-4"/></svg>Experten-Gremium (Multi-Persona)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-rose-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v2"/><path d="M21 14v2a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16v-2"/><path d="m21 10-7-4-7 4"/><path d="m3 10 7 4 7-4"/></svg>Experten-Gremium (Multi-Persona)</h3>
                             <p class="text-sm mb-4">Statt nur eine Expertenrolle zuzuweisen, lasst Ihr ein Gremium aus mehreren Experten mit unterschiedlichen Sichtweisen eine Situation bewerten. Das erzeugt eine ausgewogenere, multiperspektivische Analyse.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Bewerte die Übernahme von Firma X."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Bewerte die Übernahme von Firma X."</p>
                                     <p class="text-xs text-slate-500">Führt zu einer generischen Antwort, die wichtige, gegensätzliche Standpunkte vermissen lässt.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Agiere als Experten-Gremium zur Bewertung eines M&A-Deals. Das Gremium besteht aus: 1. CFO (fokus: finanzielle Risiken, Synergien), 2. Head of Sales (fokus: Cross-Selling, Marktwachstum), 3. Head of HR (fokus: Kultur-Fit, Integration). Lasst jeden Experten eine kurze Einschätzung zum fiktiven Target 'InnovateGmbH' abgeben. Fasst die Ergebnisse in einer Management Summary mit einer finalen, gewichteten Empfehlung zusammen."</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Agiere als Experten-Gremium zur Bewertung eines M&A-Deals. Das Gremium besteht aus: 1. CFO (fokus: finanzielle Risiken, Synergien), 2. Head of Sales (fokus: Cross-Selling, Marktwachstum), 3. Head of HR (fokus: Kultur-Fit, Integration). Lasst jeden Experten eine kurze Einschätzung zum fiktiven Target 'InnovateGmbH' abgeben. Fasst die Ergebnisse in einer Management Summary mit einer finalen, gewichteten Empfehlung zusammen."</p>
                                     <p class="text-xs text-slate-500">Simuliert eine echte, strategische Diskussion und deckt Chancen und Risiken aus verschiedenen Unternehmensbereichen auf.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-cyan-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>"Step-Back" Prompting</h3>
+                            <h3 class="text-xl font-bold mb-2 text-cyan-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>"Step-Back" Prompting</h3>
                             <p class="text-sm mb-4">Anstatt eine spezifische, einmalige Aufgabe zu lösen, lasst Ihr die KI einen "Schritt zurücktreten", um die übergeordneten Prinzipien oder ein allgemeines Framework zu erstellen. Das Ergebnis ist eine wiederverwendbare Vorlage.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Erstelle mir eine Checkliste für die Financial Due Diligence der Firma X."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Erstelle mir eine Checkliste für die Financial Due Diligence der Firma X."</p>
                                     <p class="text-xs text-slate-500">Löst nur das eine Problem, ist aber nicht auf andere Projekte übertragbar.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Tritt einen Schritt zurück und agiere als erfahrener FDD-Berater. Leite zuerst die 5 fundamentalen Prinzipien einer exzellenten Financial Due Diligence für ein mittelständisches SaaS-Unternehmen ab. Erstelle DANN, basierend auf diesen Prinzipien, eine detaillierte und wiederverwendbare Checklisten-Vorlage im Markdown-Format."</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Tritt einen Schritt zurück und agiere als erfahrener FDD-Berater. Leite zuerst die 5 fundamentalen Prinzipien einer exzellenten Financial Due Diligence für ein mittelständisches SaaS-Unternehmen ab. Erstelle DANN, basierend auf diesen Prinzipien, eine detaillierte und wiederverwendbare Checklisten-Vorlage im Markdown-Format."</p>
                                     <p class="text-xs text-slate-500">Die KI liefert nicht nur die Lösung, sondern auch die Methodik dahinter. Das Ergebnis ist ein wertvolles Template für zukünftige Projekte.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-amber-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14v8"/><path d="M12 4v2"/><path d="M18.36 6.64v0a5 5 0 0 0-7.07 0v0"/><path d="M5.64 6.64v0a5 5 0 0 1 7.07 0v0"/></svg>Tree of Thoughts (ToT)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-amber-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14v8"/><path d="M12 4v2"/><path d="M18.36 6.64v0a5 5 0 0 0-7.07 0v0"/><path d="M5.64 6.64v0a5 5 0 0 1 7.07 0v0"/></svg>Tree of Thoughts (ToT)</h3>
                             <p class="text-sm mb-4">Bringt die KI dazu, ein Problem zu erkunden, indem sie mehrere Lösungsansätze gleichzeitig bewertet und den besten auswählt. Ideal für komplexe Abwägungen.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Sollte unser Mandant das Angebot für die Firma X annehmen?"</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Sollte unser Mandant das Angebot für die Firma X annehmen?"</p>
                                     <p class="text-xs text-slate-500">Führt zu einer oberflächlichen Pro/Contra-Liste ohne klare strategische Bewertung.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Agiere als M&A-Stratege. Unser Mandant hat zwei Kaufangebote für seine Firma. Angebot A bietet mehr Cash, aber strenge Garantien. Angebot B ist niedriger, sichert aber den Standort und die Arbeitsplätze. Bewerte beide Angebote aus drei Perspektiven: 1. Finanzielle Maximierung, 2. Risiko-Minimierung (Haftung), 3. Langfristiges Erbe des Gründers. Entwickle für jede Perspektive eine Argumentationskette. Synthetisiere diese 'Gedankenbäume' am Ende zu einer finalen, gewichteten Empfehlung."</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Agiere als M&A-Stratege. Unser Mandant hat zwei Kaufangebote für seine Firma. Angebot A bietet mehr Cash, aber strenge Garantien. Angebot B ist niedriger, sichert aber den Standort und die Arbeitsplätze. Bewerte beide Angebote aus drei Perspektiven: 1. Finanzielle Maximierung, 2. Risiko-Minimierung (Haftung), 3. Langfristiges Erbe des Gründers. Entwickle für jede Perspektive eine Argumentationskette. Synthetisiere diese 'Gedankenbäume' am Ende zu einer finalen, gewichteten Empfehlung."</p>
                                     <p class="text-xs text-slate-500">Zwingt die KI zu einer mehrdimensionalen Analyse und liefert eine fundierte Entscheidungsgrundlage.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>Generated Knowledge Prompting</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>Generated Knowledge Prompting</h3>
                             <p class="text-sm mb-4">Reduziert Halluzinationen bei Nischenthemen. Man lässt die KI zuerst Fakten zum Thema generieren und weist sie dann an, die Antwort ausschließlich auf Basis dieser Fakten zu erstellen.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Schreibe eine Marktanalyse für den deutschen Markt für 'quantenbasierte Verschlüsselungssoftware'."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Schreibe eine Marktanalyse für den deutschen Markt für 'quantenbasierte Verschlüsselungssoftware'."</p>
                                     <p class="text-xs text-slate-500">Hohes Risiko für Halluzinationen, da dies ein extremes Nischenthema ist.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Generiere zuerst eine Liste mit 5 Kernfakten über den aktuellen Stand und die Hauptanbieter von quantenbasierter Verschlüsselungssoftware in Deutschland. Erstelle anschließend, **ausschließlich auf Basis dieser 5 Fakten**, eine kurze Zusammenfassung der Marktchancen und -risiken für einen neuen Investor."</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Generiere zuerst eine Liste mit 5 Kernfakten über den aktuellen Stand und die Hauptanbieter von quantenbasierter Verschlüsselungssoftware in Deutschland. Erstelle anschließend, **ausschließlich auf Basis dieser 5 Fakten**, eine kurze Zusammenfassung der Marktchancen und -risiken für einen neuen Investor."</p>
                                     <p class="text-xs text-slate-500">Die KI baut sich ein eigenes, faktenbasiertes Fundament, bevor sie die eigentliche Aufgabe löst. Das erhöht die Genauigkeit enorm.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-blue-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>ReAct (Reason & Act)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-blue-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>ReAct (Reason & Act)</h3>
                             <p class="text-sm mb-4">Diese Technik bringt das Modell dazu, seine Denkprozesse ('Reason') und die daraus folgenden Handlungen ('Act') explizit zu formulieren. Besonders nützlich für komplexe Aufgaben, die in Teilschritte zerlegt werden müssen.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Wer ist der CEO von Apple und wann wurde die Firma gegründet?"</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Wer ist der CEO von Apple und wann wurde die Firma gegründet?"</p>
                                     <p class="text-xs text-slate-500">Die KI versucht, beide Antworten direkt zu geben, was fehlschlagen kann, wenn eine Information nicht sofort parat ist.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Du hast Zugriff auf eine Suchfunktion `search(query)`. Löse die folgende Aufgabe, indem du abwechselnd `Thought` (dein Gedanke) und `Action` (deine Aktion) formulierst: Wer ist der CEO von Apple und wann wurde die Firma gegründet?"</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Du hast Zugriff auf eine Suchfunktion `search(query)`. Löse die folgende Aufgabe, indem du abwechselnd `Thought` (dein Gedanke) und `Action` (deine Aktion) formulierst: Wer ist der CEO von Apple und wann wurde die Firma gegründet?"</p>
                                     <p class="text-xs text-slate-500">**Ergebnis:** Thought: Ich muss zwei Informationen finden. Zuerst suche ich den CEO. Action: search("aktueller CEO von Apple")... Thought: Jetzt suche ich das Gründungsdatum. Action: search("Gründungsdatum Apple Inc.")...</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-orange-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 21v-6.5a2.5 2.5 0 0 0-5 0V21"/><path d="M12 12h.01"/><path d="M6 12h.01"/><path d="M18 12h.01"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Directional Stimulus Prompting</h3>
+                            <h3 class="text-xl font-bold mb-2 text-orange-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 21v-6.5a2.5 2.5 0 0 0-5 0V21"/><path d="M12 12h.01"/><path d="M6 12h.01"/><path d="M18 12h.01"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Directional Stimulus Prompting</h3>
                             <p class="text-sm mb-4">Anstatt komplexe Anweisungen zu geben, führt man die KI mit gezielten Schlüsselwörtern oder "Stimuli" in die gewünschte Richtung. Dies hilft, den Ton, Stil oder Fokus der Antwort subtil zu steuern.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Schreibe eine E-Mail über die Projektverzögerung. Sei nicht zu negativ, aber ehrlich."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Schreibe eine E-Mail über die Projektverzögerung. Sei nicht zu negativ, aber ehrlich."</p>
                                     <p class="text-xs text-slate-500">Die Anweisung ist interpretierbar und kann zu einem unpassenden Ton führen.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut:</strong> "Entwirf eine E-Mail an den Kunden bezüglich der Projektverzögerung. Wichtige Stichwörter für den Ton: **transparent, lösungsorientiert, partnerschaftlich, zuversichtlich.**"</p>
+                                    <p><strong class="text-teal-400">Gut:</strong> "Entwirf eine E-Mail an den Kunden bezüglich der Projektverzögerung. Wichtige Stichwörter für den Ton: **transparent, lösungsorientiert, partnerschaftlich, zuversichtlich.**"</p>
                                     <p class="text-xs text-slate-500">Die Stimuli geben der KI ein klares emotionales und inhaltliches Gerüst, an dem sie sich orientieren kann, was zu einem professionelleren Ergebnis führt.</p>
                                 </div>
                             </blockquote>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-green-700 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 2 2 2 4-4"/><path d="m3 8 2 2 4-4"/><path d="m3 14 2 2 4-4"/><path d="M9 22c-3 0-5.5-2.5-5.5-5.5C3.5 13.5 6 11 9 11c.3 0 .5 0 .8.1"/><path d="M12 11c0 3 2.5 5.5 5.5 5.5S23 14 23 11h-2.8c-.3 0-.5-.2-.6-.5c-.4-1-1.3-1.8-2.4-2.1c-.5-.2-1.1.2-1.1.7z"/></svg>MEGA-Prompting</h3>
+                            <h3 class="text-xl font-bold mb-2 text-green-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 2 2 2 4-4"/><path d="m3 8 2 2 4-4"/><path d="m3 14 2 2 4-4"/><path d="M9 22c-3 0-5.5-2.5-5.5-5.5C3.5 13.5 6 11 9 11c.3 0 .5 0 .8.1"/><path d="M12 11c0 3 2.5 5.5 5.5 5.5S23 14 23 11h-2.8c-.3 0-.5-.2-.6-.5c-.4-1-1.3-1.8-2.4-2.1c-.5-.2-1.1.2-1.1.7z"/></svg>MEGA-Prompting</h3>
                             <p class="text-sm mb-4">Ein "Prompt für einen Prompt". Anstatt zu versuchen, den perfekten Prompt selbst zu formulieren, weist man die KI an, als Experte einen optimierten, detaillierten Prompt für die eigentliche Aufgabe zu erstellen.</p>
-                            <blockquote class="mt-2 p-3 border-l-4 border-slate-200 bg-slate-50 text-sm w-full rounded-r-lg space-y-4">
+                            <blockquote class="mt-2 p-3 border-l-4 border-slate-600 bg-slate-800/70 text-sm w-full rounded-r-lg space-y-4">
                                 <div>
-                                    <p><strong class="text-rose-600">Nicht optimal:</strong> "Gib mir eine Due-Diligence-Checkliste für ein Softwareunternehmen."</p>
+                                    <p><strong class="text-rose-400">Nicht optimal:</strong> "Gib mir eine Due-Diligence-Checkliste für ein Softwareunternehmen."</p>
                                     <p class="text-xs text-slate-500">Führt zu einer generischen, wahrscheinlich unvollständigen Liste.</p>
                                 </div>
                                 <div>
-                                    <p><strong class="text-teal-600">Gut (MEGA-Prompt):</strong> "Ich muss eine detaillierte Due-Diligence-Checkliste für ein B2B-SaaS-Unternehmen erstellen. Agiere als erfahrener M&A-Berater und **erstelle für mich einen ultimativen Prompt**, den ich an eine KI senden kann. Dieser Prompt soll die KI anweisen, eine umfassende Checkliste zu generieren, die alle relevanten KPIs (MRR, Churn, LTV/CAC), Risikokategorien (Technologie, Team, Markt) und strukturellen Anforderungen abdeckt."</p>
+                                    <p><strong class="text-teal-400">Gut (MEGA-Prompt):</strong> "Ich muss eine detaillierte Due-Diligence-Checkliste für ein B2B-SaaS-Unternehmen erstellen. Agiere als erfahrener M&A-Berater und **erstelle für mich einen ultimativen Prompt**, den ich an eine KI senden kann. Dieser Prompt soll die KI anweisen, eine umfassende Checkliste zu generieren, die alle relevanten KPIs (MRR, Churn, LTV/CAC), Risikokategorien (Technologie, Team, Markt) und strukturellen Anforderungen abdeckt."</p>
                                     <p class="text-xs text-slate-500">Die KI nutzt ihr gesamtes Wissen, um einen Experten-Prompt zu formulieren, den man dann für die eigentliche Aufgabe verwenden kann.</p>
                                 </div>
                             </blockquote>
@@ -466,149 +598,150 @@
                 </section>
                 
                 <section id="teams" class="content-section">
+                    <!-- Content remains the same, but will appear on the new dark background -->
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Team-Szenarien & Case Studies</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Hier findet Ihr maßgeschneiderte Übungsaufgaben und Fallbeispiele für die WALTERFRIES Gruppe. Nutzt sie, um Eure neuen Fähigkeiten direkt anzuwenden.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Hier findet Ihr maßgeschneiderte Übungsaufgaben und Fallbeispiele für die WALTERFRIES Gruppe. Nutzt sie, um Eure neuen Fähigkeiten direkt anzuwenden.</p>
                     </div>
                     <div class="space-y-4" id="team-accordion">
                         <!-- Accordion Group for FPM -->
                         <div class="card">
-                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="fpm-group">
-                                <h3 class="text-2xl font-bold text-teal-800">1. FPM (Finance, Performance, Restrukturierung)</h3>
+                            <div class="p-4 cursor-pointer bg-slate-800/80 rounded-t-lg flex justify-between items-center" data-accordion-toggle="fpm-group">
+                                <h3 class="text-2xl font-bold text-teal-400">1. FPM (Finance, Performance, Restrukturierung)</h3>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </div>
                             <div class="p-6 hidden space-y-6" data-accordion-content="fpm-group">
-                                <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-teal-700">Thema: Lucanet & Finanzplanung</h4>
-                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Erkläre mir Lucanet."
+                                <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-teal-400">Thema: Lucanet & Finanzplanung</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Erkläre mir Lucanet."
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine allgemeine, oberflächliche Beschreibung.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-200 bg-teal-50 text-sm w-full rounded-lg">
-                                        <strong class="text-teal-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-500/50 bg-teal-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-teal-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als BI-Spezialist für Finanzplanung mit Lucanet. Ich bin Junior-Controller. Erstelle eine Checkliste für die Konsolidierung zweier fiktiver Töchter ('Software GmbH', 'Vertriebs GmbH'). Themen: Stammdaten-Validierung, Intercompany-Abstimmung, Validierungsregeln in Lucanet und ein Tipp zum Management-Reporting-Export."</p>
                                     </blockquote>
                                 </div>
-                                <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-teal-700">Thema: Restrukturierung nach IDW S6</h4>
-                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Was sind die Kernaussagen von IDW S6?"
+                                <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-teal-400">Thema: Restrukturierung nach IDW S6</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Was sind die Kernaussagen von IDW S6?"
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine trockene, theoretische Zusammenfassung.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-200 bg-teal-50 text-sm w-full rounded-lg">
-                                        <strong class="text-teal-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-teal-500/50 bg-teal-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-teal-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als CRO für WALTERFRIES. Ich bereite eine Einschätzung für einen fiktiven Automobilzulieferer vor. Erstelle einen Fragenkatalog gemäß den IDW S6-Krisenstufen (Stakeholder-, Strategie-, Erfolgs-, Liquiditätskrise) und formuliere daraus einen Prompt, um aus Antworten Handlungsfelder für ein Sanierungskonzept abzuleiten."</p>
                                     </blockquote>
                                 </div>
-                                 <div class="card p-4 bg-amber-50 border border-amber-200">
-                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
-                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                 <div class="card p-4 bg-amber-900/50 border border-amber-500/50">
+                                     <h4 class="font-bold text-amber-300">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-400 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
                                      <button id="generateScenario-fpm" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
                                          ✨ Neues Szenario für FPM generieren
                                      </button>
-                                     <div id="scenarioLoader-fpm" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                                     <div id="scenarioResult-fpm" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                     <div id="scenarioLoader-fpm" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-400">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-fpm" class="hidden mt-4 bg-slate-800 p-4 rounded-md border border-slate-700 text-sm"></div>
                                  </div>
                             </div>
                         </div>
 
                         <!-- Accordion Group for Strategie -->
                         <div class="card">
-                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="strategie-group">
-                                <h3 class="text-2xl font-bold text-sky-800">2. Strategie</h3>
+                            <div class="p-4 cursor-pointer bg-slate-800/80 rounded-t-lg flex justify-between items-center" data-accordion-toggle="strategie-group">
+                                <h3 class="text-2xl font-bold text-sky-400">2. Strategie</h3>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </div>
                             <div class="p-6 hidden space-y-6" data-accordion-content="strategie-group">
-                                 <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-sky-700">Thema: Führungskräftecoaching & Organisationsentwicklung</h4>
-                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Wie coache ich eine Führungskraft?"
+                                 <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-sky-400">Thema: Führungskräftecoaching & Organisationsentwicklung</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Wie coache ich eine Führungskraft?"
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Allgemeine Coaching-Tipps.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-sky-200 bg-sky-50 text-sm w-full rounded-lg">
-                                        <strong class="text-sky-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-sky-500/50 bg-sky-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-sky-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als systemischer Organisationsentwickler. Ich coache einen Teamleiter, dessen Team 'demotiviert' ist. Entwickle 3-5 kraftvolle, offene Fragen im Stil des zirkulären Fragens, um seine Perspektive zu erweitern und ihn anzuregen, das Problem aus Sicht seines Teams zu betrachten. Ziel: Hypothesengeleitete Fragen, keine fertigen Lösungen."</p>
                                     </blockquote>
                                 </div>
-                                <div class="card p-4 bg-amber-50 border border-amber-200">
-                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
-                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                <div class="card p-4 bg-amber-900/50 border border-amber-500/50">
+                                     <h4 class="font-bold text-amber-300">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-400 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
                                      <button id="generateScenario-strategie" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
                                          ✨ Neues Szenario für Strategie generieren
                                      </button>
-                                     <div id="scenarioLoader-strategie" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                                     <div id="scenarioResult-strategie" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                     <div id="scenarioLoader-strategie" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-400">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-strategie" class="hidden mt-4 bg-slate-800 p-4 rounded-md border border-slate-700 text-sm"></div>
                                  </div>
                             </div>
                         </div>
 
                         <!-- Accordion Group for M&A -->
                         <div class="card">
-                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="mna-group">
-                                <h3 class="text-2xl font-bold text-rose-800">3. M&A</h3>
+                            <div class="p-4 cursor-pointer bg-slate-800/80 rounded-t-lg flex justify-between items-center" data-accordion-toggle="mna-group">
+                                <h3 class="text-2xl font-bold text-rose-400">3. M&A</h3>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </div>
                             <div class="p-6 hidden space-y-6" data-accordion-content="mna-group">
-                                <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-rose-700">Thema: Phasen einer Transaktion</h4>
-                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Liste die Phasen einer M&A-Transaktion auf."
+                                <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-rose-400">Thema: Phasen einer Transaktion</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Liste die Phasen einer M&A-Transaktion auf."
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine generische, triviale Liste.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als M&A-Projektmanager bei WALTERFRIES (Verkäuferseite). Erstelle eine detaillierte Checkliste als Markdown-Tabelle für die Phase zwischen finalem SPA-Entwurf und Notartermin. Spalten: 'Aufgabe', 'Hauptverantwortlicher (WFCF / Mandant / Anwälte)', 'Status', 'Kritische Anmerkung'. Berücksichtige finale Verhandlungen, Offenlegungsanlagen und Kommunikation."</p>
                                     </blockquote>
                                 </div>
-                                <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-rose-700">Thema: Due Diligence (DD)</h4>
-                                     <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Was prüft man in einer Financial Due Diligence?"
+                                <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-rose-400">Thema: Due Diligence (DD)</h4>
+                                     <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Was prüft man in einer Financial Due Diligence?"
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine Lehrbuch-Aufzählung ohne Branchenfokus.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als Leiter FDD (Käuferseite) für ein fiktives B2B-SaaS-Unternehmen (5 Mio. € Umsatz). Generiere eine priorisierte Anforderungsliste für den Datenraum. Gliedere in: 1. Umsatzqualität & KPIs (MRR, Churn, LTV, CAC), 2. Qualität der Ertragslage (Normalisierungen), 3. Working Capital. Formuliere jede Anforderung als präzise Frage."</p>
                                     </blockquote>
                                 </div>
-                                <div class="card p-4 bg-amber-50 border border-amber-200">
-                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
-                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                <div class="card p-4 bg-amber-900/50 border border-amber-500/50">
+                                     <h4 class="font-bold text-amber-300">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-400 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
                                      <button id="generateScenario-mna" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
                                          ✨ Neues Szenario für M&A generieren
                                      </button>
-                                     <div id="scenarioLoader-mna" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                                     <div id="scenarioResult-mna" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                     <div id="scenarioLoader-mna" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-400">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-mna" class="hidden mt-4 bg-slate-800 p-4 rounded-md border border-slate-700 text-sm"></div>
                                  </div>
                             </div>
                         </div>
 
                          <!-- Accordion Group for Backoffice -->
                         <div class="card">
-                            <div class="p-4 cursor-pointer bg-slate-200 rounded-t-lg flex justify-between items-center" data-accordion-toggle="backoffice-group">
-                                <h3 class="text-2xl font-bold text-purple-800">4. Administration & Backoffice</h3>
+                            <div class="p-4 cursor-pointer bg-slate-800/80 rounded-t-lg flex justify-between items-center" data-accordion-toggle="backoffice-group">
+                                <h3 class="text-2xl font-bold text-purple-400">4. Administration & Backoffice</h3>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </div>
                             <div class="p-6 hidden space-y-6" data-accordion-content="backoffice-group">
-                                <div class="card p-4">
-                                    <h4 class="font-bold text-lg text-purple-700">Thema: Prozessoptimierung & Interne Kommunikation</h4>
-                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-200 bg-rose-50 text-sm w-full rounded-lg">
-                                        <strong class="text-rose-600">Nicht Optimal:</strong> "Schreib eine E-Mail über den neuen Prozess."
+                                <div class="card p-4 bg-slate-900/70">
+                                    <h4 class="font-bold text-lg text-purple-400">Thema: Prozessoptimierung & Interne Kommunikation</h4>
+                                    <blockquote class="mt-2 p-3 border-l-4 border-rose-500/50 bg-rose-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-rose-400">Nicht Optimal:</strong> "Schreib eine E-Mail über den neuen Prozess."
                                         <p class="text-xs text-slate-500 mt-1">Ergebnis: Eine nichtssagende E-Mail ohne Kontext oder Nutzenargumentation.</p>
                                     </blockquote>
-                                    <blockquote class="mt-4 p-3 border-l-4 border-purple-200 bg-purple-50 text-sm w-full rounded-lg">
-                                        <strong class="text-purple-600">Best Practice:</strong>
+                                    <blockquote class="mt-4 p-3 border-l-4 border-purple-500/50 bg-purple-900/50 text-sm w-full rounded-lg">
+                                        <strong class="text-purple-400">Best Practice:</strong>
                                         <p class="mt-2">"Agiere als Leiter des Backoffice bei WALTERFRIES. Formuliere eine interne E-Mail an alle Beraterteams. Thema: Einführung eines neuen, zentralisierten Prozesses zur Reisekostenabrechnung über [Software-Name]. Die E-Mail soll (1) den Nutzen klar kommunizieren (schneller, weniger Fehler), (2) die drei wichtigsten Prozessänderungen skizzieren und (3) auf eine detaillierte Anleitung und einen Q&A-Termin verweisen. Der Ton soll serviceorientiert und positiv sein."</p>
                                     </blockquote>
                                 </div>
-                                <div class="card p-4 bg-amber-50 border border-amber-200">
-                                     <h4 class="font-bold text-amber-800">✨ KI-Szenario-Coach</h4>
-                                     <p class="text-sm text-slate-600 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
+                                <div class="card p-4 bg-amber-900/50 border border-amber-500/50">
+                                     <h4 class="font-bold text-amber-300">✨ KI-Szenario-Coach</h4>
+                                     <p class="text-sm text-slate-400 mb-3">Keine Ideen mehr zum Üben? Lasst die KI ein neues, relevantes Szenario für diesen Bereich erstellen.</p>
                                      <button id="generateScenario-backoffice" class="w-full flex justify-center items-center gap-2 bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-600">
                                          ✨ Neues Szenario für Backoffice generieren
                                      </button>
-                                     <div id="scenarioLoader-backoffice" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-600">Generiere Szenario...</p></div>
-                                     <div id="scenarioResult-backoffice" class="hidden mt-4 bg-white p-4 rounded-md border text-sm"></div>
+                                     <div id="scenarioLoader-backoffice" class="hidden mt-4 flex justify-center items-center"><div class="loader"></div><p class="ml-2 text-sm text-slate-400">Generiere Szenario...</p></div>
+                                     <div id="scenarioResult-backoffice" class="hidden mt-4 bg-slate-800 p-4 rounded-md border border-slate-700 text-sm"></div>
                                  </div>
                             </div>
                         </div>
@@ -618,28 +751,28 @@
                 <section id="workflows" class="content-section">
                      <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Abteilungsübergreifende Workflows</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Entdeckt, wie Ihr durch die intelligente Verkettung von Prompts (Prompt-Chaining) ganze Arbeitsprozesse unterstützen könnt – von der ersten Marktanalyse bis zur finalen Handlungsempfehlung.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Entdeckt, wie Ihr durch die intelligente Verkettung von Prompts (Prompt-Chaining) ganze Arbeitsprozesse unterstützen könnt – von der ersten Marktanalyse bis zur finalen Handlungsempfehlung.</p>
                     </div>
 
                     <div class="space-y-8">
                         <!-- Flaggschiff Szenario -->
                         <div class="card p-8">
-                            <h3 class="text-2xl font-bold mb-2 text-center text-indigo-800">Flaggschiff-Szenario: Übernahme der "Future-Logistics GmbH"</h3>
-                            <p class="text-center text-slate-600 max-w-2xl mx-auto mb-6">Die "Future-Logistics GmbH" ist ein innovatives, mittelständisches Logistikunternehmen mit Spezialisierung auf die 'letzte Meile' mittels KI-gesteuerter Routenplanung. Unser Mandant, die "Global Transport Holding", erwägt eine Übernahme. Eure Aufgabe ist es, diese Transaktion in Euren jeweiligen Teams vorzubereiten.</p>
+                            <h3 class="text-2xl font-bold mb-2 text-center text-indigo-300">Flaggschiff-Szenario: Übernahme der "Future-Logistics GmbH"</h3>
+                            <p class="text-center text-slate-400 max-w-2xl mx-auto mb-6">Die "Future-Logistics GmbH" ist ein innovatives, mittelständisches Logistikunternehmen mit Spezialisierung auf die 'letzte Meile' mittels KI-gesteuerter Routenplanung. Unser Mandant, die "Global Transport Holding", erwägt eine Übernahme. Eure Aufgabe ist es, diese Transaktion in Euren jeweiligen Teams vorzubereiten.</p>
                             
-                            <div class="relative pl-6 after:absolute after:inset-y-0 after:w-px after:bg-slate-200 after:left-2.5">
+                            <div class="relative pl-6 after:absolute after:inset-y-0 after:w-px after:bg-slate-700 after:left-2.5">
                                 <!-- Step 1: Backoffice -->
                                  <div class="relative grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start mb-8">
                                     <div class="flex items-center gap-4">
-                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-purple-600 rounded-full ring-4 ring-white">1</div>
+                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-purple-600 rounded-full ring-4 ring-slate-900">1</div>
                                         <h4 class="text-xl font-bold">Mandats-Setup (Backoffice)</h4>
                                     </div>
                                     <div class="md:col-start-2 space-y-2">
-                                        <div class="p-4 bg-white border rounded-lg">
-                                            <p class="font-semibold text-slate-700">Eure Aufgabe: Das Projekt sauber aufsetzen und die Weichen stellen.</p>
+                                        <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                                            <p class="font-semibold text-slate-300">Eure Aufgabe: Das Projekt sauber aufsetzen und die Weichen stellen.</p>
                                             <p class="text-sm mt-2">Erstellt eine Agenda für das interne Kick-off-Meeting zum neuen Mandat. Plant Zeit für die Vorstellung des Targets, die Verteilung der Arbeitspakete an die anderen Teams und die Festlegung der nächsten Schritte ein.</p>
-                                            <button class="text-indigo-600 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-1').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
-                                            <div id="prompt-wf-1" class="hidden mt-2 bg-slate-800 text-white p-3 rounded-lg font-mono text-xs">
+                                            <button class="text-indigo-400 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-1').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
+                                            <div id="prompt-wf-1" class="hidden mt-2 bg-slate-900 text-white p-3 rounded-lg font-mono text-xs">
                                                 <p>Agiere als Projekt-Assistenz. Erstelle eine Agenda für das interne Kick-off-Meeting zum neuen Mandat 'Übernahme der Future-Logistics GmbH'. Berücksichtige Slots für die Vorstellung des Targets, die Verteilung der Arbeitspakete an M&A, FPM und Strategie sowie die Festlegung der nächsten Schritte und Deadlines.</p>
                                             </div>
                                         </div>
@@ -649,15 +782,15 @@
                                 <!-- Step 2: M&A -->
                                 <div class="relative grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start mb-8">
                                     <div class="flex items-center gap-4">
-                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-rose-600 rounded-full ring-4 ring-white">2</div>
+                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-rose-600 rounded-full ring-4 ring-slate-900">2</div>
                                         <h4 class="text-xl font-bold">Marktanalyse (M&A)</h4>
                                     </div>
                                     <div class="md:col-start-2 space-y-2">
-                                        <div class="p-4 bg-white border rounded-lg">
-                                            <p class="font-semibold text-slate-700">Eure Aufgabe: Den Wettbewerb des Targets verstehen.</p>
+                                        <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                                            <p class="font-semibold text-slate-300">Eure Aufgabe: Den Wettbewerb des Targets verstehen.</p>
                                             <p class="text-sm mt-2">Verschafft Euch einen Überblick über den deutschen Markt für Logistikunternehmen mit Spezialisierung auf die 'letzte Meile'. Identifiziert die Hauptwettbewerber und deren Stärken.</p>
-                                            <button class="text-indigo-600 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-2').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
-                                            <div id="prompt-wf-2" class="hidden mt-2 bg-slate-800 text-white p-3 rounded-lg font-mono text-xs">
+                                            <button class="text-indigo-400 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-2').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
+                                            <div id="prompt-wf-2" class="hidden mt-2 bg-slate-900 text-white p-3 rounded-lg font-mono text-xs">
                                                 <p>Agiere als M&A-Analyst für den deutschen Mittelstand. Gib mir einen Überblick über den deutschen Markt für 'mittelständische Logistikunternehmen mit Spezialisierung auf letzte Meile'. Identifiziere 3 Hauptwettbewerber der 'Future-Logistics GmbH' und liste deren geschätzte Marktanteile und Kerntechnologien auf.</p>
                                             </div>
                                         </div>
@@ -667,15 +800,15 @@
                                 <!-- Step 3: FPM -->
                                  <div class="relative grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start mb-8">
                                     <div class="flex items-center gap-4">
-                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-teal-600 rounded-full ring-4 ring-white">3</div>
+                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-teal-600 rounded-full ring-4 ring-slate-900">3</div>
                                         <h4 class="text-xl font-bold">Finanz-Analyse (FPM)</h4>
                                     </div>
                                     <div class="md:col-start-2 space-y-2">
-                                        <div class="p-4 bg-white border rounded-lg">
-                                            <p class="font-semibold text-slate-700">Eure Aufgabe: Potenzielle finanzielle Risiken aufdecken.</p>
+                                        <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                                            <p class="font-semibold text-slate-300">Eure Aufgabe: Potenzielle finanzielle Risiken aufdecken.</p>
                                             <p class="text-sm mt-2">Auf Basis der (fiktiven) Finanzdaten des Targets sollt Ihr finanzielle "Red Flags" identifizieren und gezielte Fragen für die Due Diligence vorbereiten.</p>
-                                             <button class="text-indigo-600 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-3').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
-                                            <div id="prompt-wf-3" class="hidden mt-2 bg-slate-800 text-white p-3 rounded-lg font-mono text-xs">
+                                             <button class="text-indigo-400 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-3').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
+                                            <div id="prompt-wf-3" class="hidden mt-2 bg-slate-900 text-white p-3 rounded-lg font-mono text-xs">
                                                 <p>Agiere als Finanzanalyst. Du erhältst folgende anonymisierte Finanzdaten eines Logistikunternehmens: [Kurze Bilanz/GuV-Daten hier einfügen]. Identifiziere basierend auf diesen Daten drei potenzielle 'Red Flags' für eine Due Diligence und formuliere konkrete Fragen, die im nächsten Management-Meeting gestellt werden müssen.</p>
                                             </div>
                                         </div>
@@ -685,15 +818,15 @@
                                  <!-- Step 4: Strategie -->
                                  <div class="relative grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start mb-8">
                                     <div class="flex items-center gap-4">
-                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-sky-600 rounded-full ring-4 ring-white">4</div>
+                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-sky-600 rounded-full ring-4 ring-slate-900">4</div>
                                         <h4 class="text-xl font-bold">Integrations-Strategie</h4>
                                     </div>
                                     <div class="md:col-start-2 space-y-2">
-                                        <div class="p-4 bg-white border rounded-lg">
-                                            <p class="font-semibold text-slate-700">Eure Aufgabe: Einen Plan für die Zeit nach der Übernahme entwickeln.</p>
+                                        <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                                            <p class="font-semibold text-slate-300">Eure Aufgabe: Einen Plan für die Zeit nach der Übernahme entwickeln.</p>
                                             <p class="text-sm mt-2">Die agile Kultur des Targets trifft auf die Konzernstruktur des Käufers. Entwickelt ein Konzept für einen Workshop, der die Führungskräfte beider Unternehmen zusammenbringt und auf die neue, gemeinsame Zukunft vorbereitet.</p>
-                                             <button class="text-indigo-600 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-4').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
-                                            <div id="prompt-wf-4" class="hidden mt-2 bg-slate-800 text-white p-3 rounded-lg font-mono text-xs">
+                                             <button class="text-indigo-400 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-4').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
+                                            <div id="prompt-wf-4" class="hidden mt-2 bg-slate-900 text-white p-3 rounded-lg font-mono text-xs">
                                                 <p>Agiere als Strategieberater für Post-Merger-Integration. Basierend auf der Tatsache, dass ein großer Konzern ('Global Transport Holding') ein agiles, mittelständisches Logistikunternehmen übernimmt: Erstelle ein Konzept für einen Workshop zur Führungskräfteentwicklung, der die beiden Unternehmenskulturen zusammenführen soll. Skizziere drei Hauptmodule für den Workshop.</p>
                                             </div>
                                         </div>
@@ -703,15 +836,15 @@
                                  <!-- Step 5: Master-Prompt -->
                                  <div class="relative grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start">
                                     <div class="flex items-center gap-4">
-                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-indigo-800 rounded-full ring-4 ring-white">5</div>
+                                        <div class="z-10 flex items-center justify-center w-12 h-12 text-2xl font-bold text-white bg-indigo-800 rounded-full ring-4 ring-slate-900">5</div>
                                         <h4 class="text-xl font-bold">Master-Prompt (Partner)</h4>
                                     </div>
                                     <div class="md:col-start-2 space-y-2">
-                                        <div class="p-4 bg-white border rounded-lg">
-                                            <p class="font-semibold text-slate-700">Ziel: Alle Teilergebnisse zu einer finalen Handlungsempfehlung zusammenfügen.</p>
+                                        <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                                            <p class="font-semibold text-slate-300">Ziel: Alle Teilergebnisse zu einer finalen Handlungsempfehlung zusammenfügen.</p>
                                             <p class="text-sm mt-2">Nehmt die Ergebnisse der einzelnen Teams und führt sie in einem "Master-Prompt" zusammen, um eine finale Präsentation mit einer klaren Handlungsempfehlung für den Mandanten zu erstellen.</p>
-                                             <button class="text-indigo-600 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-5').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
-                                            <div id="prompt-wf-5" class="hidden mt-2 bg-slate-800 text-white p-3 rounded-lg font-mono text-xs">
+                                             <button class="text-indigo-400 text-sm font-semibold mt-3" onclick="document.getElementById('prompt-wf-5').classList.toggle('hidden')">Idealen Prompt anzeigen ▼</button>
+                                            <div id="prompt-wf-5" class="hidden mt-2 bg-slate-900 text-white p-3 rounded-lg font-mono text-xs">
                                                 <p>Agiere als Senior Partner bei WALTERFRIES. Du bereitest die finale Präsentation für den Vorstand der 'Global Transport Holding' vor. Synthetisiere die folgenden Arbeitsergebnisse deiner Teams:<br><br>// Output von Schritt 2 hier einfügen //<br>// Output von Schritt 3 hier einfügen //<br>// Output von Schritt 4 hier einfügen //<br><br>Erstelle daraus eine Gliederung für eine PowerPoint-Präsentation mit 5 Folien. Die Präsentation muss eine klare Handlungsempfehlung (GO oder NO-GO für die Transaktion) enthalten und die drei wichtigsten Chancen sowie die drei größten Risiken des Deals auf einer separaten Folie zusammenfassen.</p>
                                             </div>
                                         </div>
@@ -726,70 +859,70 @@
                 <section id="tools" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Praktische KI-Tools & Plattformen</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Eine kuratierte Liste von Werkzeugen, die Euch im Beratungsalltag unterstützen können.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Eine kuratierte Liste von Werkzeugen, die Euch im Beratungsalltag unterstützen können.</p>
                     </div>
                     <div class="card p-6">
                         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <!-- Perplexity -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Perplexity AI</h4>
                                 <p class="text-sm mt-1">KI-gestützte Suchmaschine für direkte, belegte Antworten. Ideal für schnelle, fundierte Recherchen.</p>
-                                <p class="text-xs mt-2"><strong>Website:</strong> <a href="https://www.perplexity.ai/" target="_blank" class="text-indigo-600 hover:underline">perplexity.ai</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Website:</strong> <a href="https://www.perplexity.ai/" target="_blank" class="text-indigo-400 hover:underline">perplexity.ai</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> "Welche M&A-Softwarelösungen bieten die besten KI-Features für die Due Diligence?" Perplexity liefert eine Zusammenfassung mit Quellen.
                                 </blockquote>
                             </div>
                             <!-- Docurex -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Virtuelle Datenräume (z.B. Docurex)</h4>
                                 <p class="text-sm mt-1">Sichere Datenräume mit KI-Funktionen zur automatischen Schwärzung und Dokumentenanalyse für die Due Diligence.</p>
-                                <p class="text-xs mt-2"><strong>Website:</strong> <a href="https://docurex.com/" target="_blank" class="text-indigo-600 hover:underline">docurex.com</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Website:</strong> <a href="https://docurex.com/" target="_blank" class="text-indigo-400 hover:underline">docurex.com</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> KI schwärzt automatisch personenbezogene Daten in hunderten Verträgen vor dem Bieterzugriff.
                                 </blockquote>
                             </div>
                             <!-- AlphaSense/Tegus -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Experten-Recherche (z.B. AlphaSense)</h4>
                                 <p class="text-sm mt-1">KI-Suche in Tausenden von Experteninterviews und Berichten. Essentiell für die Commercial Due Diligence.</p>
-                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://www.alpha-sense.com/" target="_blank" class="text-indigo-600 hover:underline">alpha-sense.com</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://www.alpha-sense.com/" target="_blank" class="text-indigo-400 hover:underline">alpha-sense.com</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> "Was sagen Experten über Margen im deutschen SaaS-Markt für Logistik?" liefert sofort relevante Zitate.
                                 </blockquote>
                             </div>
                             <!-- SourceScrub/Grata -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Deal Sourcing (z.B. Grata)</h4>
                                 <p class="text-sm mt-1">KI-Plattformen, die das Web durchsuchen, um passende, unentdeckte Übernahmeziele zu identifizieren.</p>
-                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://grata.com/" target="_blank" class="text-indigo-600 hover:underline">grata.com</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://grata.com/" target="_blank" class="text-indigo-400 hover:underline">grata.com</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> Filtern nach "privaten Softwarefirmen in DACH mit 50-100 Mitarbeitern, die auf Logistik-Messen waren".
                                 </blockquote>
                             </div>
                              <!-- Tome / Gamma -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">KI-Präsentationen (z.B. Tome, Gamma)</h4>
                                 <p class="text-sm mt-1">Tools, die aus einem einfachen Text-Prompt eine komplette, designte Präsentation erstellen. Ideal für erste Entwürfe.</p>
-                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://tome.app/" target="_blank" class="text-indigo-600 hover:underline">tome.app</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://tome.app/" target="_blank" class="text-indigo-400 hover:underline">tome.app</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> "Erstelle eine Präsentation über die ESG-Trends im Maschinenbau 2025" generiert eine 8-Folien-Struktur mit Bildern.
                                 </blockquote>
                             </div>
                              <!-- Fireflies.ai -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Meeting-Assistenten (z.B. Fireflies)</h4>
                                 <p class="text-sm mt-1">KI-Tools, die an Online-Meetings teilnehmen, sie transkribieren, zusammenfassen und Action-Items extrahieren.</p>
-                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://fireflies.ai/" target="_blank" class="text-indigo-600 hover:underline">fireflies.ai</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://fireflies.ai/" target="_blank" class="text-indigo-400 hover:underline">fireflies.ai</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> Die KI liefert 10 Minuten nach dem Mandanten-Call eine Zusammenfassung der wichtigsten Entscheidungen per E-Mail.
                                 </blockquote>
                             </div>
                              <!-- Julius AI -->
-                            <div class="p-4 bg-slate-50 rounded-lg border">
+                            <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700">
                                 <h4 class="font-bold">Datenanalyse-Chatbots (z.B. Julius)</h4>
                                 <p class="text-sm mt-1">Chat-Interfaces, mit denen man komplexe Daten (Excel, CSV) durch einfache Fragen analysieren und visualisieren kann.</p>
-                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://julius.ai/" target="_blank" class="text-indigo-600 hover:underline">julius.ai</a></p>
-                                <blockquote class="mt-2 p-2 bg-white border-l-2 border-slate-200 text-xs">
+                                <p class="text-xs mt-2"><strong>Websites:</strong> <a href="https://julius.ai/" target="_blank" class="text-indigo-400 hover:underline">julius.ai</a></p>
+                                <blockquote class="mt-2 p-2 bg-slate-900/70 border-l-2 border-slate-600 text-xs">
                                     <strong>Beispiel:</strong> Lade eine FDD-Tabelle hoch und frage: "Visualisiere die Umsatzentwicklung der letzten 3 Jahre als Balkendiagramm."
                                 </blockquote>
                             </div>
@@ -800,13 +933,13 @@
                 <section id="zukunft" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Zukunft & Ausblick</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Ein kleiner Bereich, der regelmäßig aktualisiert wird und über die neuesten Entwicklungen in der KI-Welt informiert.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Ein kleiner Bereich, der regelmäßig aktualisiert wird und über die neuesten Entwicklungen in der KI-Welt informiert.</p>
                     </div>
                     <div class="space-y-8">
                         <div class="card p-6">
-                            <h3 class="text-2xl font-bold mb-3 text-sky-700">Neue Techniken im Kommen: KI-Agenten</h3>
+                            <h3 class="text-2xl font-bold mb-3 text-sky-400">Neue Techniken im Kommen: KI-Agenten</h3>
                             <p class="text-sm">Stellt Euch vor, Ihr gebt der KI nicht nur eine Aufgabe, sondern ein **Ziel**. Ein KI-Agent zerlegt dieses Ziel selbstständig in Einzelschritte, führt diese aus, prüft die Ergebnisse und korrigiert seinen Kurs bei Bedarf – ganz ohne Euer weiteres Zutun.</p>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm">
                                 <p><strong>Beispiel:</strong></p>
                                 <p class="mt-2"><strong>Euer Ziel:</strong> "Finde für mich drei potenzielle Übernahmeziele im deutschen Softwaremarkt mit einem Umsatz von 10-20 Mio €, die im Bereich Logistik-Software tätig sind und eine positive Bewertung auf gängigen Portalen haben. Erstelle für jedes Ziel eine kurze SWOT-Analyse und fasse die Ergebnisse in einer PowerPoint-Präsentation zusammen."</p>
                                 <p class="mt-4 font-semibold">Ein KI-Agent würde dann autonom:</p>
@@ -821,12 +954,12 @@
                         </div>
                         
                         <div class="card p-6">
-                            <h3 class="text-2xl font-bold mb-3 text-sky-700">Zukunft der KI: Model Context Protocol (MCP)</h3>
+                            <h3 class="text-2xl font-bold mb-3 text-sky-400">Zukunft der KI: Model Context Protocol (MCP)</h3>
                             <p class="text-sm">Die Zukunft liegt nicht nur in besseren Modellen, sondern auch darin, wie wir ihnen sicher und standardisiert Kontext geben. Das **Model Context Protocol (MCP)** ist ein Konzept für ein standardisiertes Format, das einer KI vor jeder Anfrage wichtige Metadaten übermittelt. Es stellt sicher, dass die KI den richtigen Kontext hat – z.B. Nutzerrolle, Berechtigungen und Datenquellen.</p>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm">
                                 <p><strong>Beispiel-Szenario:</strong></p>
                                 <p class="mt-2">Ein Analyst stellt eine Anfrage an ein internes KI-System. Das System sendet zusammen mit der Anfrage ein MCP an das Sprachmodell:</p>
-                                <div class="mt-2 p-2 bg-slate-800 text-white rounded font-mono text-xs">
+                                <div class="mt-2 p-2 bg-slate-900 text-white rounded font-mono text-xs">
                                     <pre><code>{
   "user_role": "Senior Analyst",
   "project_id": "Projekt-Phönix-2025",
@@ -843,11 +976,11 @@
 
                         <div class="grid md:grid-cols-2 gap-8">
                              <div class="card p-6">
-                                <h3 class="text-2xl font-bold mb-3 text-sky-700">Neue Modelle am Horizont</h3>
+                                <h3 class="text-2xl font-bold mb-3 text-sky-400">Neue Modelle am Horizont</h3>
                                 <p class="text-sm">Die Entwicklung schreitet rasant voran. Modelle wie das erwartete **GPT-5** versprechen, noch "multimodaler" zu werden. Das bedeutet, sie können nicht nur Text, sondern auch Bilder, Videos und Audio noch besser verstehen und in ihren Antworten kombinieren. Stellt Euch vor, Ihr gebt der KI eine Bilanz als PDF und eine Audioaufnahme eines Management-Interviews und sie erstellt daraus eine umfassende Analyse.</p>
                             </div>
-                            <div class="card p-6 bg-indigo-50 border-indigo-200">
-                                <h3 class="text-2xl font-bold mb-3 text-indigo-700">WALTERFRIES Intern</h3>
+                            <div class="card p-6 bg-indigo-900/50 border-indigo-500/50">
+                                <h3 class="text-2xl font-bold mb-3 text-indigo-300">WALTERFRIES Intern</h3>
                                 <p class="text-sm">Dieser Bereich wird in Zukunft genutzt, um Euch über neue, intern validierte Best Practices, erfolgreiche Case-Studies aus unseren Teams oder aktualisierte Compliance-Richtlinien zum Umgang mit KI zu informieren. Schaut regelmäßig vorbei!</p>
                             </div>
                         </div>
@@ -857,46 +990,46 @@
                 <section id="glossar" class="content-section">
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Glossar: KI-Begriffe einfach erklärt</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Hier sind die wichtigsten Begriffe aus der Welt der KI kurz und verständlich aufbereitet.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Hier sind die wichtigsten Begriffe aus der Welt der KI kurz und verständlich aufbereitet.</p>
                     </div>
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Künstliche Intelligenz (KI)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Künstliche Intelligenz (KI)</h3>
                             <p class="text-sm">Der Überbegriff für alle Technologien, die es Maschinen ermöglichen, menschenähnliche Intelligenz zu zeigen, wie z.B. lernen, schlussfolgern und Probleme lösen.</p>
                             <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Der Oberbegriff "Fahrzeug".</p>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Maschinelles Lernen (ML)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Maschinelles Lernen (ML)</h3>
                             <p class="text-sm">Ein Teilbereich der KI. Statt explizit programmiert zu werden, lernt ein ML-Modell aus großen Datenmengen, Muster zu erkennen und Vorhersagen zu treffen.</p>
                             <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Ein "Auto" ist eine Art von Fahrzeug. ML ist eine Art von KI.</p>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Deep Learning</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Deep Learning</h3>
                             <p class="text-sm">Eine spezielle, sehr leistungsfähige Methode des Maschinellen Lernens. Sie nutzt "Neuronale Netze" mit vielen Schichten, um sehr komplexe Muster in Daten zu erkennen (z.B. in Bildern oder Sprache).</p>
                              <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Ein "Elektroauto" ist eine spezielle Art von Auto.</p>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Großes Sprachmodell (LLM)</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Großes Sprachmodell (LLM)</h3>
                             <p class="text-sm">Ein riesiges Deep-Learning-Modell, das speziell darauf trainiert wurde, menschliche Sprache zu verstehen und zu erzeugen. Es ist das "Gehirn" hinter Systemen wie ChatGPT.</p>
                              <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Der spezifische "Tesla-Motor", der ein Elektroauto antreibt.</p>
                         </div>
                          <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">ChatGPT</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">ChatGPT</h3>
                             <p class="text-sm">Der Name der konkreten Anwendung (des Chatbots) von OpenAI, die ein LLM (wie z.B. GPT-4o) nutzt, um mit Nutzern zu interagieren. Es ist also die Schnittstelle oder das "Gesicht" zum Sprachmodell.</p>
                              <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Das "Tesla Model S" - das fertige Auto, das man fährt und das vom Motor angetrieben wird.</p>
                         </div>
                         <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Prompt Engineering</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Prompt Engineering</h3>
                             <p class="text-sm">Die Kunst, die richtige Frage oder Anweisung zu formulieren, um die bestmögliche Antwort von einer KI zu erhalten.</p>
                             <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Zu wissen, wie man einen erfahrenen Chauffeur präzise anweist, um genau am gewünschten Ziel anzukommen.</p>
                         </div>
                          <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Kontextfenster</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Kontextfenster</h3>
                             <p class="text-sm">Das "Kurzzeitgedächtnis" der KI in einem einzelnen Chat. Alles, was Ihr schreibt, füllt dieses Gedächtnis. Ist es voll, vergisst die KI den Anfang des Gesprächs.</p>
                             <p class="text-xs text-slate-500 mt-2"><strong>Analogie:</strong> Ein Whiteboard. Solange Platz ist, ist alles sichtbar. Für ein neues Thema ist ein neues, leeres Whiteboard (neuer Chat) besser.</p>
                         </div>
                          <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-2 text-indigo-700">Token</h3>
+                            <h3 class="text-xl font-bold mb-2 text-indigo-400">Token</h3>
                             <p class="text-sm">Die Bausteine, in denen eine KI Sprache verarbeitet. Ein Token ist ungefähr ein halbes bis dreiviertel Wort. Das Kontextfenster wird in Tokens bemessen.</p>
                             <p class="text-xs text-slate-500 mt-2"><strong>Beispiel:</strong> Der Satz "Die WALTERFRIES Gruppe" besteht aus ca. 5-6 Tokens, nicht nur 3 Wörtern.</p>
                         </div>
@@ -906,18 +1039,18 @@
                 <section id="sicherheit" class="content-section">
                      <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold mb-2">Sicherheit, Ethik & Umgang mit Daten</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600">Der Einsatz von KI erfordert nicht nur technische, sondern auch ethische Kompetenz. Hier lernt Ihr die entscheidenden Regeln für einen verantwortungsvollen Umgang mit Daten.</p>
+                        <p class="max-w-3xl mx-auto text-slate-400">Der Einsatz von KI erfordert nicht nur technische, sondern auch ethische Kompetenz. Hier lernt Ihr die entscheidenden Regeln für einen verantwortungsvollen Umgang mit Daten.</p>
                     </div>
                     
                     <div class="text-center mb-12">
-                        <h3 class="text-2xl font-bold text-slate-800">Die Daten-Ampel: Welcher Input ist erlaubt?</h3>
-                        <p class="mt-2 max-w-2xl mx-auto text-slate-600">Nicht alle Daten sind gleich. Diese Ampel zeigt, wie Ihr mit unterschiedlichen Datenkategorien umgehen müsst.</p>
+                        <h3 class="text-2xl font-bold text-slate-100">Die Daten-Ampel: Welcher Input ist erlaubt?</h3>
+                        <p class="mt-2 max-w-2xl mx-auto text-slate-400">Nicht alle Daten sind gleich. Diese Ampel zeigt, wie Ihr mit unterschiedlichen Datenkategorien umgehen müsst.</p>
                     </div>
 
                     <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Green -->
                         <div class="card p-6 border-t-4 border-teal-500">
-                             <h4 class="text-xl font-bold text-teal-700 flex items-center gap-3">
+                             <h4 class="text-xl font-bold text-teal-400 flex items-center gap-3">
                                 <span class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">✓</span>
                                 GRÜN: Freie & Öffentliche Daten
                             </h4>
@@ -928,14 +1061,14 @@
                                 <li>Allgemeine Branchen-News und Marktstudien</li>
                                 <li>Theoretische Konzepte und Modelle</li>
                             </ul>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm">
                                 <strong>Beispiel-Prompt:</strong> "Fasse mir die Kernaussagen des IDW S6 Standards zusammen."
                             </blockquote>
                         </div>
                         
                         <!-- Yellow -->
                         <div class="card p-6 border-t-4 border-amber-500">
-                             <h4 class="text-xl font-bold text-amber-700 flex items-center gap-3">
+                             <h4 class="text-xl font-bold text-amber-400 flex items-center gap-3">
                                 <span class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold">!</span>
                                 GELB: Unternehmensdaten
                             </h4>
@@ -946,15 +1079,15 @@
                                 <li>Umsatzzahlen oder Finanzkennzahlen</li>
                                 <li>Projektnamen oder interne Codenamen</li>
                             </ul>
-                             <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm space-y-3">
-                                <p><strong class="text-rose-600">Schlecht:</strong> "Erstelle eine Präsentation für unser Projekt 'Phönix' mit der Firma Müller GmbH, die einen Umsatz von 15 Mio. € hat."</p>
-                                <p><strong class="text-teal-600">Gut:</strong> "Erstelle eine Präsentation für ein M&A-Projekt (Codename: [Projektname]) mit einem Zielunternehmen aus der [Branche] mit einem Umsatz von [Umsatz]. Entferne alle echten Namen."</p>
+                             <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm space-y-3">
+                                <p><strong class="text-rose-400">Schlecht:</strong> "Erstelle eine Präsentation für unser Projekt 'Phönix' mit der Firma Müller GmbH, die einen Umsatz von 15 Mio. € hat."</p>
+                                <p><strong class="text-teal-400">Gut:</strong> "Erstelle eine Präsentation für ein M&A-Projekt (Codename: [Projektname]) mit einem Zielunternehmen aus der [Branche] mit einem Umsatz von [Umsatz]. Entferne alle echten Namen."</p>
                             </blockquote>
                         </div>
 
                         <!-- Red -->
                         <div class="card p-6 border-t-4 border-rose-500">
-                             <h4 class="text-xl font-bold text-rose-700 flex items-center gap-3">
+                             <h4 class="text-xl font-bold text-rose-400 flex items-center gap-3">
                                 <span class="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold">✕</span>
                                 ROT: Hochsensible Daten
                             </h4>
@@ -965,32 +1098,32 @@
                                 <li>Gehaltsdaten, Personalakten-Inhalte</li>
                                 <li>Vertrauliche Vertragsdetails, Passwörter</li>
                             </ul>
-                            <blockquote class="mt-4 p-3 bg-slate-50 border-l-4 border-slate-200 text-sm">
+                            <blockquote class="mt-4 p-3 bg-slate-800/70 border-l-4 border-slate-600 text-sm">
                                 <strong>Es gibt hier keine "guten" Beispiele. Die Eingabe dieser Daten ist ein Compliance-Verstoß.</strong>
                             </blockquote>
                         </div>
                     </div>
-                    <div class="card p-6 mt-8 bg-indigo-50 border-l-4 border-indigo-500">
-                        <h4 class="text-xl font-bold text-indigo-800">Im Zweifel: FRAGT NACH!</h4>
-                        <p class="mt-2 text-slate-700">Wenn Ihr unsicher seid, in welche Kategorie Eure Daten fallen: Gebt sie **NICHT** ein! Fragt stattdessen bei **MARIO (@MS Teams)** nach. Lieber einmal zu viel gefragt als einmal gegen die Compliance verstoßen.</p>
+                    <div class="card p-6 mt-8 bg-indigo-900/50 border-l-4 border-indigo-500">
+                        <h4 class="text-xl font-bold text-indigo-300">Im Zweifel: FRAGT NACH!</h4>
+                        <p class="mt-2 text-slate-300">Wenn Ihr unsicher seid, in welche Kategorie Eure Daten fallen: Gebt sie **NICHT** ein! Fragt stattdessen bei **MARIO (@MS Teams)** nach. Lieber einmal zu viel gefragt als einmal gegen die Compliance verstoßen.</p>
                     </div>
                  </section>
 
                  <section id="quiz" class="content-section">
                     <div id="quiz-intro" class="active text-center card p-8">
                         <h2 class="text-3xl font-bold mb-2">🏆 Willkommen zum Quiz-Battle!</h2>
-                        <p class="max-w-3xl mx-auto text-slate-600 mb-6">Testet Euer Wissen in einem freundschaftlichen Wettbewerb! Wir spielen einen 30-Fragen-Parcours. Pro Frage hat das zufällig ausgewählte Team 30 Sekunden Zeit zum Antworten. Welches Team wird der Prompting-Champion?</p>
+                        <p class="max-w-3xl mx-auto text-slate-400 mb-6">Testet Euer Wissen in einem freundschaftlichen Wettbewerb! Wir spielen einen 30-Fragen-Parcours. Pro Frage hat das zufällig ausgewählte Team 30 Sekunden Zeit zum Antworten. Welches Team wird der Prompting-Champion?</p>
                         <button id="start-quiz-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-xl">Battle starten!</button>
                     </div>
                     <div id="quiz-game" class="hidden card p-6 md:p-8">
-                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-700 pb-4 gap-4">
                             <div class="flex justify-center gap-4 md:gap-6 order-2 md:order-1">
-                                <div id="score-wfc" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-teal-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">TEAM WFC</p></div>
-                                <div id="score-backoffice" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-sky-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team Backoffice</p></div>
-                                <div id="score-wfcf" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-rose-600 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team WFCF</p></div>
+                                <div id="score-wfc" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-teal-400 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">TEAM WFC</p></div>
+                                <div id="score-backoffice" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-sky-400 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team Backoffice</p></div>
+                                <div id="score-wfcf" class="text-center p-2 rounded-lg transition-all duration-300"><p class="font-bold text-rose-400 text-2xl md:text-3xl">0</p><p class="text-xs font-medium">Team WFCF</p></div>
                             </div>
                             <div class="text-center order-1 md:order-2">
-                                <p id="quiz-timer" class="font-bold text-slate-800 text-3xl md:text-4xl">30</p>
+                                <p id="quiz-timer" class="font-bold text-slate-100 text-3xl md:text-4xl">30</p>
                                 <p class="text-xs tracking-wider">SEKUNDEN</p>
                             </div>
                         </div>
@@ -1001,7 +1134,7 @@
                             <p class="text-sm text-slate-500 mb-2 text-center">Frage <span id="question-number">1</span> von 30</p>
                             <h3 id="question-text" class="text-xl md:text-2xl font-semibold mb-6 text-center min-h-[6rem]"></h3>
                             <div id="answer-options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                            <p id="answer-rationale" class="text-sm mt-4 p-3 bg-slate-100 rounded-lg hidden text-center"></p>
+                            <p id="answer-rationale" class="text-sm mt-4 p-3 bg-slate-800 rounded-lg hidden text-center"></p>
                         </div>
                     </div>
                     <div id="quiz-results" class="hidden text-center card p-8">
@@ -1010,9 +1143,9 @@
                         <p class="text-xl mb-4">Herzlichen Glückwunsch an</p>
                         <h3 id="winner-team" class="text-4xl font-bold mb-8"></h3>
                         <div class="flex justify-center gap-8 mb-8">
-                            <div id="final-score-wfc" class="text-center"><p class="font-bold text-teal-600 text-3xl">0</p><p>TEAM WFC</p></div>
-                            <div id="final-score-backoffice" class="text-center"><p class="font-bold text-sky-600 text-3xl">0</p><p>Team Backoffice</p></div>
-                            <div id="final-score-wfcf" class="text-center"><p class="font-bold text-rose-600 text-3xl">0</p><p>Team WFCF</p></div>
+                            <div id="final-score-wfc" class="text-center"><p class="font-bold text-teal-400 text-3xl">0</p><p>TEAM WFC</p></div>
+                            <div id="final-score-backoffice" class="text-center"><p class="font-bold text-sky-400 text-3xl">0</p><p>Team Backoffice</p></div>
+                            <div id="final-score-wfcf" class="text-center"><p class="font-bold text-rose-400 text-3xl">0</p><p>Team WFCF</p></div>
                         </div>
                         <button id="restart-quiz" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Erneut spielen</button>
                     </div>
@@ -1021,34 +1154,286 @@
         </div>
     </div>
     
-    <!-- Modal and Toast HTML remains unchanged -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="password-modal-title" class="text-xl font-bold mb-4 text-center">Bereich gesperrt</h3>
+            <p class="text-slate-400 mb-6 text-center">Bitte gib das Passwort ein, um fortzufahren.</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" placeholder="Passwort">
+                <p id="password-error-msg" class="text-rose-400 text-sm mt-2 h-5 text-center"></p>
+                <button type="submit" class="mt-4 w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-indigo-700">Freischalten</button>
+            </form>
+        </div>
+    </div>
+
     <div id="promptModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="modalTitle" class="text-2xl font-bold"></h3>
-                <button id="closeModal" class="text-3xl font-bold text-slate-500 hover:text-slate-800">&times;</button>
+                <button id="closeModal" class="text-3xl font-bold text-slate-400 hover:text-slate-100">&times;</button>
             </div>
             <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
                 <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('modalPromptText')">Kopieren</button>
                 <pre id="modalPromptText" class="whitespace-pre-wrap"></pre>
             </div>
-            <div class="mt-4 p-4 bg-slate-100 rounded-lg">
+            <div class="mt-4 p-4 bg-slate-800/70 rounded-lg">
                 <h4 class="font-bold mb-2">Analyse: Warum dieser Prompt funktioniert</h4>
-                <p id="modalAnalysis" class="text-sm text-slate-700"></p>
+                <p id="modalAnalysis" class="text-sm text-slate-300"></p>
             </div>
         </div>
     </div>
     <div id="toast-notification" class="hidden fixed bottom-5 right-5 py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 z-50"><span id="toast-message"></span></div>
 
     <script>
+        // --- BACKGROUND CANVAS SCRIPT ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let stars;
+        const numStars = 800;
+        const mouse = {
+            x: undefined,
+            y: undefined
+        };
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    originalRadius: Math.random() * 1.5 + 0.5,
+                    color: `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.5})`,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.fill();
+            });
+        }
+
+        function update() {
+            stars.forEach(star => {
+                // Mouse interaction
+                if (mouse.x !== undefined && mouse.y !== undefined) {
+                    let dx = mouse.x - star.x;
+                    let dy = mouse.y - star.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        star.radius = star.originalRadius + (1 - distance / 150) * 2;
+                    } else {
+                        star.radius = star.originalRadius;
+                    }
+                }
+
+                // Movement
+                star.x += star.vx;
+                star.y += star.vy;
+
+                // Wall collision
+                if (star.x < 0 || star.x > canvas.width) star.vx = -star.vx;
+                if (star.y < 0 || star.y > canvas.height) star.vy = -star.vy;
+            });
+        }
+
+        function animate() {
+            draw();
+            update();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+        window.addEventListener('mouseout', () => {
+             mouse.x = undefined;
+             mouse.y = undefined;
+        })
+
+        init();
+        animate();
+
+
+        // --- PAGE LOGIC SCRIPT ---
         document.addEventListener('DOMContentLoaded', function() {
-            // All JavaScript logic from the previous quiz version goes here.
-            // This includes navigation, charts, modals, Gemini API calls, and the Quiz Battle.
+            // --- COUNTDOWN TIMER LOGIC ---
+            const countdownWrapper = document.getElementById('countdown-wrapper');
+            const passwordPromptText = document.getElementById('password-prompt-text');
+            const initialPasswordFormElements = document.querySelectorAll('#initial-password-form input, #initial-password-form button');
+            const targetDate = new Date("2025-07-04T11:30:00+02:00").getTime();
+            let countdownInterval;
+
+            function endCountdown() {
+                if (countdownInterval) clearInterval(countdownInterval);
+                countdownWrapper.innerHTML = `<h4 class="text-2xl font-bold text-teal-400 mb-4 animate-pulse">Die Tore zur Galaxie sind geöffnet!</h4>`;
+                passwordPromptText.textContent = "Viel Spaß beim Erkunden! Bitte gib das Startpasswort ein.";
+                initialPasswordFormElements.forEach(el => el.disabled = false);
+                document.getElementById('initial-password-input').focus();
+            }
+
+            function startCountdown() {
+                countdownInterval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = targetDate - now;
+
+                    if (distance < 0) {
+                        endCountdown();
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById('days').textContent = String(days).padStart(2, '0');
+                    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+
+                }, 1000);
+            }
+
+            // Disable form elements initially and start countdown
+            initialPasswordFormElements.forEach(el => el.disabled = true);
+            startCountdown();
+
+
+            // --- PASSWORD & UNLOCK LOGIC ---
+            const passwords = {
+                override: "lift0ff",
+                grundlagen: "start",
+                architektur: "bauplan",
+                advanced: "profi",
+                teams: "teamwork",
+                workflows: "prozess",
+                tools: "werkzeug",
+                zukunft: "vision",
+                glossar: "lexikon",
+                sicherheit: "safe",
+                quiz: "battle"
+            };
+
+            const unlockedStatus = {};
+            Object.keys(passwords).forEach(key => unlockedStatus[key] = false);
+
+            const entryScreen = document.getElementById('entry-screen');
+            const mainContent = document.getElementById('main-content');
+            const initialPasswordForm = document.getElementById('initial-password-form');
+            const initialPasswordInput = document.getElementById('initial-password-input');
+            const initialErrorMsg = document.getElementById('initial-error-msg');
+            
+            const passwordModal = document.getElementById('password-modal');
+            const passwordForm = document.getElementById('password-form');
+            const passwordInput = document.getElementById('password-input');
+            const passwordErrorMsg = document.getElementById('password-error-msg');
+            const passwordModalTitle = document.getElementById('password-modal-title');
+            const instructorLoginBtn = document.getElementById('instructor-login-btn');
+            
+            let loginContext = 'section'; // 'section', 'instructor'
+            let currentSectionToUnlock = '';
+
+            function showPasswordModal(sectionId) {
+                currentSectionToUnlock = sectionId;
+                
+                // FIX: Check if sectionId is valid before querying the DOM
+                if (loginContext === 'section' && sectionId) {
+                    const sectionNameEl = document.querySelector(`.nav-item[data-target='${sectionId}'] .nav-text`);
+                    if (sectionNameEl) {
+                        passwordModalTitle.textContent = `Bereich "${sectionNameEl.textContent}" gesperrt`;
+                    }
+                }
+                // For instructor login, the title is set in its own event listener, so this block is skipped.
+
+                passwordInput.value = '';
+                passwordErrorMsg.textContent = '';
+                passwordModal.style.display = 'flex';
+                passwordInput.focus();
+            }
+            
+            function hidePasswordModal() {
+                passwordModal.style.display = 'none';
+            }
+
+            function unlockSection(sectionId) {
+                unlockedStatus[sectionId] = true;
+                const navButton = document.querySelector(`.nav-item[data-target='${sectionId}']`);
+                navButton.classList.remove('locked');
+                showToast(`Bereich "${navButton.querySelector('.nav-text').textContent}" freigeschaltet!`, 'success');
+            }
+            
+            instructorLoginBtn.addEventListener('click', () => {
+                loginContext = 'instructor';
+                passwordModalTitle.textContent = 'Kursleiter-Login';
+                showPasswordModal(''); // No specific section needed
+            });
+            
+            initialPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (initialPasswordInput.value === passwords.grundlagen) {
+                    entryScreen.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    unlockSection('grundlagen');
+                    document.querySelector('.nav-item[data-target="grundlagen"]').classList.add('active');
+                    document.getElementById('grundlagen').classList.add('active');
+                } else {
+                    initialErrorMsg.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
+                    initialPasswordInput.value = '';
+                }
+            });
+
+            passwordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const enteredPassword = passwordInput.value;
+
+                if (loginContext === 'instructor') {
+                    if (enteredPassword === passwords.override) {
+                        showToast('Countdown vorzeitig beendet!', 'success');
+                        endCountdown();
+                        hidePasswordModal();
+                    } else {
+                        passwordErrorMsg.textContent = 'Falsches Passwort.';
+                        passwordInput.value = '';
+                    }
+                } else { // 'section' context
+                    if (enteredPassword === passwords[currentSectionToUnlock]) {
+                        unlockSection(currentSectionToUnlock);
+                        hidePasswordModal();
+                        document.querySelector(`.nav-item[data-target='${currentSectionToUnlock}']`).click();
+                    } else {
+                        passwordErrorMsg.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
+                        passwordInput.value = '';
+                    }
+                }
+            });
+            
+            passwordModal.addEventListener('click', (e) => {
+                if (e.target === passwordModal) {
+                    hidePasswordModal();
+                }
+            });
+
+
             // --- UTILITY FUNCTIONS ---
             function showToast(message, type = 'success') {
                 const toast = document.getElementById('toast-notification');
-                const toastMessage = document.getElementById('toast-message');
+                const toastMessage = document.createElement('span');
+                toast.innerHTML = ''; // Clear previous content
                 toastMessage.innerText = message;
+                toast.appendChild(toastMessage);
                 toast.classList.remove('bg-teal-600', 'bg-rose-600', 'text-white');
                 if (type === 'success') {
                     toast.classList.add('bg-teal-600', 'text-white');
@@ -1102,18 +1487,20 @@
                 }
             };
 
-            // --- INITIALIZATION ---
+            // --- NAVIGATION LOGIC ---
             const navItems = document.querySelectorAll('.nav-item');
             const contentSections = document.querySelectorAll('.content-section');
-            // Set initial active section
-            const initialActiveSection = document.querySelector('.content-section');
-            if (initialActiveSection) {
-                initialActiveSection.classList.add('active');
-            }
-
+            
             navItems.forEach(item => {
+                const targetId = item.getAttribute('data-target');
+                item.classList.add('locked'); // Lock all buttons initially
+
                 item.addEventListener('click', () => {
-                    const targetId = item.getAttribute('data-target');
+                    if (!unlockedStatus[targetId]) {
+                        loginContext = 'section';
+                        showPasswordModal(targetId);
+                        return;
+                    }
                     
                     navItems.forEach(nav => nav.classList.remove('active'));
                     item.classList.add('active');
@@ -1196,18 +1583,18 @@
                 });
             });
 
-            // Modal Logic
-            const modal = document.getElementById('promptModal');
+            // Prompt Modal Logic
+            const promptModal = document.getElementById('promptModal');
             const closeModalBtn = document.getElementById('closeModal');
-            if (modal && closeModalBtn) {
+            if (promptModal && closeModalBtn) {
                  window.openModal = function (title, prompt, analysis) {
                     document.getElementById('modalTitle').innerText = title;
                     document.getElementById('modalPromptText').innerText = prompt;
                     document.getElementById('modalAnalysis').innerText = analysis;
-                    modal.style.display = 'block';
+                    promptModal.style.display = 'block';
                 }
-                closeModalBtn.onclick = () => modal.style.display = 'none';
-                window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
+                closeModalBtn.onclick = () => promptModal.style.display = 'none';
+                window.onclick = (event) => { if (event.target == promptModal) { promptModal.style.display = 'none'; } };
             }
             
             // Quiz Logic
@@ -1284,7 +1671,7 @@
                     shuffledAnswers.forEach(answer => {
                         const button = document.createElement('button');
                         button.textContent = answer.text;
-                        button.className = 'quiz-answer-btn p-4 border rounded-lg bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed w-full text-left';
+                        button.className = 'quiz-answer-btn p-4 border rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed w-full text-left';
                         button.onclick = () => selectAnswer(button, answer.correct, questionData.answers, answeringTeam.id);
                         document.getElementById('answer-options').appendChild(button);
                     });
@@ -1320,12 +1707,12 @@
                     let timeLeft = TIME_LIMIT;
                     const timerEl = document.getElementById('quiz-timer');
                     timerEl.textContent = timeLeft;
-                    timerEl.classList.remove('text-rose-600', 'animate-pulse');
+                    timerEl.classList.remove('text-rose-500', 'animate-pulse');
                     timerInterval = setInterval(() => {
                         timeLeft--;
                         timerEl.textContent = timeLeft;
                         if (timeLeft <= 5 && timeLeft > 0) {
-                            timerEl.classList.add('text-rose-600', 'animate-pulse');
+                            timerEl.classList.add('text-rose-500', 'animate-pulse');
                         }
                         if (timeLeft <= 0) {
                             timeUp();
