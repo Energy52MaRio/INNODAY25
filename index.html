@@ -27,12 +27,7 @@
              border: 1px solid rgba(255, 255, 255, 0.1);
              transition: all 0.2s ease-in-out;
         }
-        .nav-item.locked {
-            background-color: rgba(51, 65, 85, 0.4);
-            cursor: not-allowed;
-            color: #94a3b8;
-        }
-        .nav-item:not(.locked):hover {
+        .nav-item:hover {
             background-color: rgba(71, 85, 105, 0.8);
         }
         .nav-item.active {
@@ -138,16 +133,6 @@
             color: #e2e8f0;
             border: 1px solid rgba(255,255,255,0.2);
         }
-        .lock-icon {
-            opacity: 0.6;
-            transition: opacity 0.2s ease-in-out;
-        }
-        .nav-item:not(.locked) .lock-icon {
-            display: none;
-        }
-        .nav-item.locked .nav-text {
-            opacity: 0.6;
-        }
         button:disabled {
             cursor: not-allowed;
             opacity: 0.5;
@@ -177,60 +162,18 @@
             <p class="text-lg text-slate-400 mt-2">am Innovationday 4.7.2025 - ein interaktiver Hub für die WALTERFRIES Gruppe</p>
         </header>
         
-        <div id="entry-screen" class="text-center">
-             <div class="card max-w-lg mx-auto p-8">
-                <div id="countdown-wrapper">
-                    <div id="countdown-container" class="mb-6">
-                        <h4 class="text-lg font-semibold text-amber-400 mb-4">Der Countdown läuft!</h4>
-                        <div class="flex justify-center gap-4 sm:gap-6 text-center">
-                            <div>
-                                <div id="days" class="text-3xl sm:text-4xl font-bold">00</div>
-                                <div class="text-xs text-slate-400">Tage</div>
-                            </div>
-                            <div>
-                                <div id="hours" class="text-3xl sm:text-4xl font-bold">00</div>
-                                <div class="text-xs text-slate-400">Stunden</div>
-                            </div>
-                            <div>
-                                <div id="minutes" class="text-3xl sm:text-4xl font-bold">00</div>
-                                <div class="text-xs text-slate-400">Minuten</div>
-                            </div>
-                            <div>
-                                <div id="seconds" class="text-3xl sm:text-4xl font-bold">00</div>
-                                <div class="text-xs text-slate-400">Sekunden</div>
-                            </div>
-                        </div>
-                        <p id="countdown-message" class="text-slate-400 text-xs mt-4">Noch schnell einen Kaffee holen, der Einlass zur digitalen Galaxie beginnt bald...</p>
-                    </div>
-                </div>
-
-                 <hr class="border-slate-700 my-6">
-
-                 <h3 class="text-xl font-bold mb-4">Willkommen!</h3>
-                 <p id="password-prompt-text" class="text-slate-400 mb-6">Bitte gib das Passwort für den ersten Kursabschnitt "Grundlagen" ein, um zu starten.</p>
-                 <form id="initial-password-form">
-                     <input type="password" id="initial-password-input" class="block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" placeholder="Passwort">
-                     <p id="initial-error-msg" class="text-rose-400 text-sm mt-2 h-5"></p>
-                     <button type="submit" id="start-course-btn" class="mt-4 w-full flex justify-center items-center gap-2 bg-teal-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-teal-700">Kurs starten</button>
-                 </form>
-                 <div class="mt-6 text-center">
-                    <button id="instructor-login-btn" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">Kursleiter-Login</button>
-                </div>
-             </div>
-        </div>
-
-        <div id="main-content" class="hidden bg-slate-900/50 border border-slate-200/20 rounded-2xl shadow-lg p-4 md:p-8 backdrop-blur-md">
+        <div id="main-content" class="bg-slate-900/50 border border-slate-200/20 rounded-2xl shadow-lg p-4 md:p-8 backdrop-blur-md">
             <nav class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="grundlagen"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Grundlagen</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="architektur"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Prompt-Architektur</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="advanced"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Fortgeschrittene Techniken</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="teams"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Team-Szenarien</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="workflows"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Workflows</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="tools"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Tools & Plattformen</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="zukunft"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Zukunft & Ausblick</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="glossar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Glossar</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="sicherheit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Sicherheit & Ethik</span></button>
-                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="quiz"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nav-text">Quiz-Battle</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="grundlagen"><span class="nav-text">Grundlagen</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="architektur"><span class="nav-text">Prompt-Architektur</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="advanced"><span class="nav-text">Fortgeschrittene Techniken</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="teams"><span class="nav-text">Team-Szenarien</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="workflows"><span class="nav-text">Workflows</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="tools"><span class="nav-text">Tools & Plattformen</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="zukunft"><span class="nav-text">Zukunft & Ausblick</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="glossar"><span class="nav-text">Glossar</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="sicherheit"><span class="nav-text">Sicherheit & Ethik</span></button>
+                <button class="nav-item flex items-center gap-2 text-sm md:text-base font-semibold py-2.5 px-5 rounded-full" data-target="quiz"><span class="nav-text">Quiz-Battle</span></button>
             </nav>
 
             <main>
@@ -412,33 +355,6 @@
                                <blockquote class="text-left text-xs bg-rose-900/50 border-l-4 border-rose-500/50 p-2 mb-2"><strong>Schlecht:</strong> "Erkläre die Bilanz."</blockquote>
                                <blockquote class="text-left text-xs bg-teal-900/50 border-l-4 border-teal-500/50 p-2"><strong>Gut:</strong> "Erkläre die Bilanz so einfach wie möglich für einen Auszubildenden im ersten Lehrjahr, der keine Vorkenntnisse hat."</blockquote>
                            </div>
-                        </div>
-                    </div>
-                    <div class="card p-8 mb-12 bg-amber-900/50 border border-amber-500/50">
-                        <h3 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2 text-amber-300">✨ Game Changer: Der interaktive Universalprompt-Coach</h3>
-                        <p class="text-center text-slate-400 mb-6">Lasst die KI für Euch arbeiten! Beschreibt Euer Ziel, und der KI-Coach entwickelt den perfekten Prompt für Euch.</p>
-                        <div class="space-y-4">
-                            <div>
-                                <label for="userGoal" class="block text-sm font-medium text-slate-300">1. Was möchtet Ihr erreichen?</label>
-                                <input type="text" id="userGoal" class="mt-1 block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. eine Marketing-E-Mail für ein neues Produkt schreiben">
-                            </div>
-                            <div>
-                                <label for="userContext" class="block text-sm font-medium text-slate-300">2. Für welchen Bereich/Beruf soll der Prompt sein?</label>
-                                <input type="text" id="userContext" class="mt-1 block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="z.B. M&A-Berater bei WALTERFRIES">
-                            </div>
-                            <button id="generateUniversalPrompt" class="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                ✨ Prompt vom KI-Coach entwickeln lassen
-                            </button>
-                        </div>
-                        <div id="universalPromptResult" class="mt-6 hidden">
-                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-sm relative">
-                                 <button class="absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs py-1 px-2 rounded" onclick="copyToClipboard('universalPromptOutput')">Kopieren</button>
-                                 <pre id="universalPromptOutput" class="whitespace-pre-wrap"></pre>
-                            </div>
-                        </div>
-                         <div id="universalPromptLoader" class="hidden mt-6 flex justify-center items-center">
-                            <div class="loader"></div>
-                            <p class="ml-4 text-slate-400">KI-Coach entwickelt den Prompt...</p>
                         </div>
                     </div>
                 </section>
@@ -1154,18 +1070,6 @@
         </div>
     </div>
     
-    <div id="password-modal" class="modal">
-        <div class="modal-content">
-            <h3 id="password-modal-title" class="text-xl font-bold mb-4 text-center">Bereich gesperrt</h3>
-            <p class="text-slate-400 mb-6 text-center">Bitte gib das Passwort ein, um fortzufahren.</p>
-            <form id="password-form">
-                <input type="password" id="password-input" class="block w-full rounded-md border-slate-600 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" placeholder="Passwort">
-                <p id="password-error-msg" class="text-rose-400 text-sm mt-2 h-5 text-center"></p>
-                <button type="submit" class="mt-4 w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-indigo-700">Freischalten</button>
-            </form>
-        </div>
-    </div>
-
     <div id="promptModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -1269,162 +1173,11 @@
 
         // --- PAGE LOGIC SCRIPT ---
         document.addEventListener('DOMContentLoaded', function() {
-            // --- COUNTDOWN TIMER LOGIC ---
-            const countdownWrapper = document.getElementById('countdown-wrapper');
-            const passwordPromptText = document.getElementById('password-prompt-text');
-            const initialPasswordFormElements = document.querySelectorAll('#initial-password-form input, #initial-password-form button');
-            const targetDate = new Date("2025-07-04T11:30:00+02:00").getTime();
-            let countdownInterval;
-
-            function endCountdown() {
-                if (countdownInterval) clearInterval(countdownInterval);
-                countdownWrapper.innerHTML = `<h4 class="text-2xl font-bold text-teal-400 mb-4 animate-pulse">Die Tore zur Galaxie sind geöffnet!</h4>`;
-                passwordPromptText.textContent = "Viel Spaß beim Erkunden! Bitte gib das Startpasswort ein.";
-                initialPasswordFormElements.forEach(el => el.disabled = false);
-                document.getElementById('initial-password-input').focus();
-            }
-
-            function startCountdown() {
-                countdownInterval = setInterval(() => {
-                    const now = new Date().getTime();
-                    const distance = targetDate - now;
-
-                    if (distance < 0) {
-                        endCountdown();
-                        return;
-                    }
-
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    document.getElementById('days').textContent = String(days).padStart(2, '0');
-                    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-                    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-                    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-
-                }, 1000);
-            }
-
-            // Disable form elements initially and start countdown
-            initialPasswordFormElements.forEach(el => el.disabled = true);
-            startCountdown();
-
-
-            // --- PASSWORD & UNLOCK LOGIC ---
-            const passwords = {
-                override: "lift0ff",
-                grundlagen: "start",
-                architektur: "bauplan",
-                advanced: "profi",
-                teams: "teamwork",
-                workflows: "prozess",
-                tools: "werkzeug",
-                zukunft: "vision",
-                glossar: "lexikon",
-                sicherheit: "safe",
-                quiz: "battle"
-            };
-
-            const unlockedStatus = {};
-            Object.keys(passwords).forEach(key => unlockedStatus[key] = false);
-
-            const entryScreen = document.getElementById('entry-screen');
-            const mainContent = document.getElementById('main-content');
-            const initialPasswordForm = document.getElementById('initial-password-form');
-            const initialPasswordInput = document.getElementById('initial-password-input');
-            const initialErrorMsg = document.getElementById('initial-error-msg');
             
-            const passwordModal = document.getElementById('password-modal');
-            const passwordForm = document.getElementById('password-form');
-            const passwordInput = document.getElementById('password-input');
-            const passwordErrorMsg = document.getElementById('password-error-msg');
-            const passwordModalTitle = document.getElementById('password-modal-title');
-            const instructorLoginBtn = document.getElementById('instructor-login-btn');
-            
-            let loginContext = 'section'; // 'section', 'instructor'
-            let currentSectionToUnlock = '';
-
-            function showPasswordModal(sectionId) {
-                currentSectionToUnlock = sectionId;
-                
-                // FIX: Check if sectionId is valid before querying the DOM
-                if (loginContext === 'section' && sectionId) {
-                    const sectionNameEl = document.querySelector(`.nav-item[data-target='${sectionId}'] .nav-text`);
-                    if (sectionNameEl) {
-                        passwordModalTitle.textContent = `Bereich "${sectionNameEl.textContent}" gesperrt`;
-                    }
-                }
-                // For instructor login, the title is set in its own event listener, so this block is skipped.
-
-                passwordInput.value = '';
-                passwordErrorMsg.textContent = '';
-                passwordModal.style.display = 'flex';
-                passwordInput.focus();
-            }
-            
-            function hidePasswordModal() {
-                passwordModal.style.display = 'none';
-            }
-
-            function unlockSection(sectionId) {
-                unlockedStatus[sectionId] = true;
-                const navButton = document.querySelector(`.nav-item[data-target='${sectionId}']`);
-                navButton.classList.remove('locked');
-                showToast(`Bereich "${navButton.querySelector('.nav-text').textContent}" freigeschaltet!`, 'success');
-            }
-            
-            instructorLoginBtn.addEventListener('click', () => {
-                loginContext = 'instructor';
-                passwordModalTitle.textContent = 'Kursleiter-Login';
-                showPasswordModal(''); // No specific section needed
-            });
-            
-            initialPasswordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (initialPasswordInput.value === passwords.grundlagen) {
-                    entryScreen.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                    unlockSection('grundlagen');
-                    document.querySelector('.nav-item[data-target="grundlagen"]').classList.add('active');
-                    document.getElementById('grundlagen').classList.add('active');
-                } else {
-                    initialErrorMsg.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
-                    initialPasswordInput.value = '';
-                }
-            });
-
-            passwordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const enteredPassword = passwordInput.value;
-
-                if (loginContext === 'instructor') {
-                    if (enteredPassword === passwords.override) {
-                        showToast('Countdown vorzeitig beendet!', 'success');
-                        endCountdown();
-                        hidePasswordModal();
-                    } else {
-                        passwordErrorMsg.textContent = 'Falsches Passwort.';
-                        passwordInput.value = '';
-                    }
-                } else { // 'section' context
-                    if (enteredPassword === passwords[currentSectionToUnlock]) {
-                        unlockSection(currentSectionToUnlock);
-                        hidePasswordModal();
-                        document.querySelector(`.nav-item[data-target='${currentSectionToUnlock}']`).click();
-                    } else {
-                        passwordErrorMsg.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
-                        passwordInput.value = '';
-                    }
-                }
-            });
-            
-            passwordModal.addEventListener('click', (e) => {
-                if (e.target === passwordModal) {
-                    hidePasswordModal();
-                }
-            });
+            // --- SET INITIAL STATE ---
+            // The main content is now visible by default, and the first section is active.
+            document.querySelector('.nav-item[data-target="grundlagen"]').classList.add('active');
+            document.getElementById('grundlagen').classList.add('active');
 
 
             // --- UTILITY FUNCTIONS ---
@@ -1460,7 +1213,7 @@
             const callGemini = async (prompt) => {
                 let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBUE7bGnlayeXWg2_ONFVoT_SHnqptl2fE"; // Leave empty, will be injected by the environment.
+                const apiKey = ""; // Leave empty, will be injected by the environment.
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 try {
                     const response = await fetch(apiUrl, {
@@ -1492,15 +1245,8 @@
             const contentSections = document.querySelectorAll('.content-section');
             
             navItems.forEach(item => {
-                const targetId = item.getAttribute('data-target');
-                item.classList.add('locked'); // Lock all buttons initially
-
                 item.addEventListener('click', () => {
-                    if (!unlockedStatus[targetId]) {
-                        loginContext = 'section';
-                        showPasswordModal(targetId);
-                        return;
-                    }
+                    const targetId = item.getAttribute('data-target');
                     
                     navItems.forEach(nav => nav.classList.remove('active'));
                     item.classList.add('active');
@@ -1527,31 +1273,6 @@
                 });
             });
             
-            // Universal Prompt Handler
-            const generateUniversalPromptBtn = document.getElementById('generateUniversalPrompt');
-            if (generateUniversalPromptBtn) {
-                generateUniversalPromptBtn.addEventListener('click', async () => {
-                    const userGoal = document.getElementById('userGoal').value;
-                    const userContext = document.getElementById('userContext').value;
-                    const resultDiv = document.getElementById('universalPromptResult');
-                    const loader = document.getElementById('universalPromptLoader');
-
-                    if (!userGoal || !userContext) {
-                        showToast('Bitte füllt beide Felder aus.', 'error');
-                        return;
-                    }
-
-                    const prompt = `Du bist ein Prompt-Engineer für den Bereich "${userContext}". Dein Ziel ist es, mir dabei zu helfen, den bestmöglichen Prompt für mein Ziel zu schreiben. Mein Ziel ist: "${userGoal}". Folge diesem Prozess: Deine erste Antwort wird darin bestehen, mir zu helfen, meinen initialen Gedanken zu verbessern. Generiere dafür 4 Abschnitte: a) Deine Rolle als Assistent (z.B. "Du bist ein erfahrener [Rolle]..."), b) Überarbeiteter Prompt (Dein Vorschlag für den optimierten Prompt), c) Vorschläge (Was kann ich noch hinzufügen, um den Prompt zu verbessern?), d) Fragen (Welche Infos brauchst Du noch von mir?). Formatiere die Antwort klar und übersichtlich in der Du-Ansprache.`;
-
-                    loader.classList.remove('hidden');
-                    resultDiv.classList.add('hidden');
-                    const responseText = await callGemini(prompt);
-                    document.getElementById('universalPromptOutput').innerText = responseText;
-                    loader.classList.add('hidden');
-                    resultDiv.classList.remove('hidden');
-                });
-            }
-
             // Scenario Generator Handler
             document.querySelectorAll('[id^="generateScenario-"]').forEach(button => {
                 button.addEventListener('click', async () => {
@@ -1777,4 +1498,3 @@
     </script>
 </body>
 </html>
-
